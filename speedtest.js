@@ -6,7 +6,7 @@
       
       // Properties
         this.requesting = false; // Indicates if a resquest is currently running
-        this.timers; // Values stored in this array are used to calculate the connexion speed
+        this.steps; // Values stored in this array are used to calculate the connexion speed
 
         this.maxTime = 6000; // Maximum time used for one test (download OR upload)
         this.serverFile = 'speedtest.php'; // PHP file that will be used to download and upload binary data
@@ -39,6 +39,9 @@
       if(this.requesting) return; // Multiple requests are bad!
 
       // Init
+        this.maxSpeed = null;
+        this.minSpeed = null;
+
         var o = this,
             xhr = new XMLHttpRequest();
 
@@ -47,21 +50,29 @@
       // Events
         var xhrProgress = function(e) {
           
-          var timers = o.timers,
+          var steps = o.steps,
               progress = e.progress || e.loaded; // Firefox 6 fix
 
-          timers.push([new Date().getTime(), progress]); // Adding time and progression to be able to calculate speed
+          steps.push([new Date().getTime(), progress]); // Adding time and progression to be able to calculate speed
 
-          var timersLen = timers.length - 1,
-              timeDelta = timers[timersLen][0] - timers[timersLen - 1][0],
-              progressDelta = timers[timersLen][1] - timers[timersLen - 1][1],
-              instantSpeed = Math.ceil(progressDelta / timeDelta); // Here is your instant speed!
+          var stepsLen = steps.length - 1,
+              timeDelta = steps[stepsLen][0] - steps[stepsLen - 1][0],
+              progressDelta = steps[stepsLen][1] - steps[stepsLen - 1][1],
+              currentSpeed = Math.ceil(progressDelta / timeDelta); // Here is your instant speed!
+          
+          if(o.maxSpeed == null || o.maxSpeed < currentSpeed) {
+            o.maxSpeed = currentSpeed;
+          }
+
+          if(o.minSpeed == null || o.minSpeed > currentSpeed) {
+            o.minSpeed = currentSpeed;
+          }
 
           // User event
             if(download) {
-              o.download.onprogress(instantSpeed);
+              o.download.onprogress(currentSpeed, o.minSpeed, o.maxSpeed);
             } else {
-              o.upload.onprogress(instantSpeed);
+              o.upload.onprogress(currentSpeed, o.minSpeed, o.maxSpeed);
             }
 
         };
@@ -76,15 +87,15 @@
 
           o.requesting = false;
 
-          var timers = o.timers,
-              timeDelta = new Date().getTime() - timers[0][0],
-              avgSpeed = Math.ceil(timers[timers.length - 1][1] / timeDelta);
+          var steps = o.steps,
+              timeDelta = new Date().getTime() - steps[0][0],
+              avgSpeed = Math.ceil(steps[steps.length - 1][1] / timeDelta);
 
           // User event
             if(download) {
-              o.download.onload(avgSpeed);
+              o.download.onload(avgSpeed, o.minSpeed, o.maxSpeed);
             } else {
-              o.upload.onload(avgSpeed);
+              o.upload.onload(avgSpeed, o.minSpeed, o.maxSpeed);
             }
           
           // Second request
@@ -118,7 +129,7 @@
 
       // Send
         this.requesting = true;
-        this.timers = [[ new Date().getTime(), 0]]; // Initializes the timers list
+        this.steps = [[ new Date().getTime(), 0]]; // Initializes the steps list
 
         this.maxTime && setTimeout(function() { // timeout property isn't supported by many recent web browsers
           

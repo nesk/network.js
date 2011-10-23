@@ -1,6 +1,6 @@
 # Presentation
 
-SpeedTest is a simple script used to estimate your connection speed in KiloBytes per second. No Flash, just HTML5.
+SpeedTest is a simple script used to estimate your average connection speed in KiloBytes per second. No Flash, just HTML5.
 
 Works with the latest versions of Firefox, Chrome and Safari.
 
@@ -43,11 +43,11 @@ var settings = {
 ## Event handlers
 
 ```
-Function download.onprogress ( Number instantSpeed )
-Function download.onload ( Number averageSpeed )
+Function download.onprogress ( Number currentSpeed, Number minSpeed, Number maxSpeed )
+Function download.onload ( Number averageSpeed, Number minSpeed, Number maxSpeed )
 
-Function upload.onprogress ( Number instantSpeed )
-Function upload.onload ( Number averageSpeed )
+Function upload.onprogress ( Number currentSpeed, Number minSpeed, Number maxSpeed )
+Function upload.onload ( Number averageSpeed, Number minSpeed, Number maxSpeed )
 ```
 
 Example of use :
@@ -55,8 +55,10 @@ Example of use :
 ```js
 var STInstance = new SpeedTest();
 
-STInstance.download.onprogress = function(speed) {
-  console.log('Actual download speed : '+ speed);
+STInstance.download.onprogress = function(speed, min, max) {
+  console.log('Current speed : '+ speed);
+  console.log('Minimum speed : '+ min);
+  console.log('Maximum speed : '+ min);
 };
 ```
 
@@ -81,4 +83,4 @@ Void startRequest( download, twoRequests )
 
 `download` : *true* for download, *false* for upload.
 
-`twoRequests` allows you to run two requests with a single use of `startRequest()`. If `download` is set at *true*, it will start with the downloading test and will continue with the uploading test. If `download`is at *false*, it will do the opposite.
+`twoRequests` allows you to run two requests with a single use of `startRequest()`. If `download` is set at *true*, it will start with the downloading test and will continue with the uploading test. If `download`is at *false*, it will do the opposite, upload first and download after.
