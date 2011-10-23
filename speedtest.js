@@ -8,7 +8,7 @@
         this.requesting = false; // Indicates if a resquest is currently running
         this.steps; // Values stored in this array are used to calculate the connexion speed
 
-        this.maxTime = 6000; // Maximum time used for one test (download OR upload)
+        this.maxTime = 8000; // Maximum time used for one test (download OR upload)
         this.serverFile = 'speedtest.php'; // PHP file that will be used to download and upload binary data
       
       // Events
@@ -41,6 +41,7 @@
       // Init
         this.maxSpeed = null;
         this.minSpeed = null;
+        this.readyForMaxMin = false; // maxSpeed and minSpeed values aren't accurate when the request is starting, a delay is needed
 
         var o = this,
             xhr = new XMLHttpRequest();
@@ -60,19 +61,21 @@
               progressDelta = steps[stepsLen][1] - steps[stepsLen - 1][1],
               currentSpeed = Math.ceil(progressDelta / timeDelta); // Here is your instant speed!
           
-          if(o.maxSpeed == null || o.maxSpeed < currentSpeed) {
-            o.maxSpeed = currentSpeed;
-          }
+          if(o.readyForMaxMin) { // See the initialization of the startRequest() function for details on this
+            if(o.maxSpeed == null || o.maxSpeed < currentSpeed) {
+              o.maxSpeed = currentSpeed;
+            }
 
-          if(o.minSpeed == null || o.minSpeed > currentSpeed) {
-            o.minSpeed = currentSpeed;
+            if(o.minSpeed == null || o.minSpeed > currentSpeed) {
+              o.minSpeed = currentSpeed;
+            }
           }
 
           // User event
             if(download) {
-              o.download.onprogress(currentSpeed, o.minSpeed, o.maxSpeed);
+              o.download.onprogress(currentSpeed, o.readyForMaxMin ? o.minSpeed : 0, o.readyForMaxMin ? o.maxSpeed : 0);
             } else {
-              o.upload.onprogress(currentSpeed, o.minSpeed, o.maxSpeed);
+              o.upload.onprogress(currentSpeed, o.readyForMaxMin ? o.minSpeed : 0, o.readyForMaxMin ? o.maxSpeed : 0);
             }
 
         };
@@ -139,6 +142,10 @@
           }
 
         }, this.maxTime);
+
+        setTimeout(function() { // The delay needed for max and min values to be accurate
+          o.readyForMaxMin = true;
+        }, 1000);
         
         xhr.send(form);
 

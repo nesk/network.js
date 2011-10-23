@@ -62,6 +62,8 @@ STInstance.download.onprogress = function(speed, min, max) {
 };
 ```
 
+`minSpeed` and `maxSpeed` are measured a short delay after the request has started. Don't be surprised if you see a value like 0 when the request is starting.
+
 ## Properties
 
 ```
