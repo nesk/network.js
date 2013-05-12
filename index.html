@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Speedtest</title>
+
+    <style>
+      @import url('style.css');
+    </style>
+  </head>
+
+  <body>
+
+    <h1>
+      Test your connection speed without Flash : only HTML5!
+    </h1>
+
+    <div id="content">
+
+      <p>
+        <input id="testButton" type="button" value="Begin test!">
+        <br />
+        Please, remember you are on my personnal web page, so your evaluated connection speed may not reflect your real connection speed. The reason ? I do not have the <a href="http://speedtest.net/">speedtest.net</a> servers...
+      </p>
+
+      <div id="speedzone">
+
+        <div id="download">
+          <h2>Download</h2>
+          <p>
+            <strong>Current speed</strong> : <span>-</span> KB/s<br />
+            <strong>Minimum speed</strong> : <span>-</span> KB/s<br />
+            <strong>Maximum speed</strong> : <span>-</span> KB/s
+          </p>
+        </div>
+
+        <div id="upload">
+          <h2>Upload</h2>
+          <p>
+            <strong>Current speed</strong> : <span>-</span> KB/s<br />
+            <strong>Minimum speed</strong> : <span>-</span> KB/s<br />
+            <strong>Maximum speed</strong> : <span>-</span> KB/s
+          </p>
+        </div>
+      
+      </div>
+
+      <p id="complete">
+        Test completed!
+      </p>
+    
+    </div>
+
+    <footer>
+      This page is part of a project named SpeedTest. You can find more at : <a href="https://github.com/Nesk/SpeedTest">https://github.com/Nesk/SpeedTest</a>
+    </footer>
+
+
+    <script src="./speedtest.js"></script>
+
+    <script>
+      
+      (function() {
+
+        var $ = function(a){ return document.querySelector(a) },
+            $$ = function(a){ return document.querySelectorAll(a) };
+
+        var settings = {
+          
+          download: {
+
+            onprogress: function(speed, min, max) {
+              $$('#download span')[0].innerHTML = speed;
+              $$('#download span')[1].innerHTML = min;
+              $$('#download span')[2].innerHTML = max;
+            },
+
+            onload: function(speed, min, max) {
+              $$('#download strong')[0].innerHTML = 'Average speed';
+              $$('#download span')[0].innerHTML = speed;
+              $$('#download span')[1].innerHTML = min;
+              $$('#download span')[2].innerHTML = max;
+            }
+
+          },
+
+          upload: {
+
+            onprogress: function(speed, min, max) {
+              $$('#upload span')[0].innerHTML = speed;
+              $$('#upload span')[1].innerHTML = min;
+              $$('#upload span')[2].innerHTML = max;
+            },
+
+            onload: function(speed, min, max) {
+              $$('#upload strong')[0].innerHTML = 'Average speed';
+              $$('#upload span')[0].innerHTML = speed;
+              $$('#upload span')[1].innerHTML = min;
+              $$('#upload span')[2].innerHTML = max;
+
+              $('#testButton').disabled = false;
+              $('#complete').style.display = 'block';
+            }
+
+          }
+
+        };
+
+
+        var STInstance = new SpeedTest(settings);
+
+
+        $('#testButton').onclick = function() {
+          
+          $('#download strong').innerHTML = 'Current speed';
+          $('#upload strong').innerHTML = 'Current speed';
+          $$('#upload span')[0].innerHTML = '-';
+          $$('#upload span')[1].innerHTML = '-';
+          $$('#upload span')[2].innerHTML = '-';
+
+          $('#testButton').disabled = true;
+          $('#complete').style.display = 'none';
+
+          STInstance.startRequest(true, true);
+
+        };
+
+      })();
+
+    </script>
+
+  </body>
+</html>
