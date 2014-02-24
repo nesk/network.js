@@ -1,4 +1,4 @@
-(function() {
+require(['modules/ping', 'modules/bandwidth'], function(PingModule, BandwidthModule) {
 
     'use strict';
 
@@ -44,4 +44,4 @@
     // Class exposure.
     window.SpeedTest = SpeedTest;
 
-})();
+});

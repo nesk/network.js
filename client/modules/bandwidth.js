@@ -1,4 +1,4 @@
-(function() {
+define(['modules/basic'], function(BasicModule) {
 
     'use strict';
 
@@ -16,6 +16,6 @@
     };
 
     // Class exposure.
-    window.BandwidthModule = BandwidthModule;
+    return BandwidthModule;
 
-})();
+});

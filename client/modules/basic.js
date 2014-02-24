@@ -1,4 +1,4 @@
-(function() {
+define(function() {
 
     'use strict';
 
@@ -100,6 +100,6 @@
     };
 
     // Class exposure.
-    window.BasicModule = BasicModule;
+    return BasicModule;
 
-})();
+});

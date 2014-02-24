@@ -1,4 +1,4 @@
-(function() {
+define(['modules/basic'], function(BasicModule) {
 
     'use strict';
 
@@ -13,6 +13,6 @@
     };
 
     // Class exposure.
-    window.PingModule = PingModule;
+    return PingModule;
 
-})();
+});
