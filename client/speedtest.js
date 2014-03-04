@@ -3,11 +3,14 @@ require(['modules/ping', 'modules/bandwidth'], function(PingModule, BandwidthMod
     'use strict';
 
     var SpeedTest = function(endpoint) {
-        var modules = this._modules = {};
+        if (typeof endpoint == 'undefined') {
+            console.warn('An endpoint should be provided when a new SpeedTest object is instanciated.');
+        }
 
-        this._setModule('ping', new PingModule())
-            ._setModule('upload', new BandwidthModule('upload'))
-            ._setModule('download', new BandwidthModule('download'));
+        this._modules = {};
+        this._setModule('ping', new PingModule(endpoint))
+            ._setModule('upload', new BandwidthModule(endpoint, 'upload'))
+            ._setModule('download', new BandwidthModule(endpoint, 'download'));
     };
 
     var fn = SpeedTest.prototype;
@@ -33,7 +36,7 @@ require(['modules/ping', 'modules/bandwidth'], function(PingModule, BandwidthMod
         var _this = this;
 
         if (object) {
-            this._modules[name] = object.on('newRequest', function() {
+            this._modules[name] = object.on('_newRequest', function() {
                 return !_this.isRequesting();
             });
         }

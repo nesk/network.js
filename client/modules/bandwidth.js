@@ -2,8 +2,8 @@ define(['modules/basic'], function(BasicModule) {
 
     'use strict';
 
-    var BandwidthModule = function(loadingType) {
-        BasicModule.call(this);
+    var BandwidthModule = function(endpoint, loadingType) {
+        BasicModule.call(this, endpoint);
 
         var validLoadingTypes = ['upload', 'download'];
         this._loadingType = (~validLoadingTypes.indexOf(loadingType)) ? loadingType : 'download';

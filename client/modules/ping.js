@@ -2,8 +2,8 @@ define(['modules/basic'], function(BasicModule) {
 
     'use strict';
 
-    var PingModule = function() {
-        BasicModule.call(this);
+    var PingModule = function(endpoint) {
+        BasicModule.call(this, endpoint);
     };
 
     var fn = PingModule.prototype = Object.create(BasicModule.prototype);
