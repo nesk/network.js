@@ -82,12 +82,23 @@ define(['modules/http'], function(HttpModule) {
 
     fn._calculate = function() {
         var latencies = this._latencies,
-            avgLatency = latencies.reduce(function(a, b) {
-                return a + b;
-            });
+            isThereAnyZeroLatency = false;
+        
+        // Get the average latency.
+        var avgLatency = latencies.reduce(function(a, b) {
+            // Check if there is any latency equal to zero.
+            isThereAnyZeroLatency = isThereAnyZeroLatency || (a == 0 || b == 0);
+            // Sum the current latency to the previous value.
+            return a + b;
+        }) / latencies.length;
 
-        avgLatency /= latencies.length;
+        // If there is any zero latency, display a warning.
+        console.warn([
+            'At least one latency returned a zero value, this can be due to the configuration of your web server which',
+            'is probably using persistant connections. Check the documentation to solve this problem.'
+        ].join(' '));
 
+        // Trigger the "end" event with the average latency and the latency list as parameters.
         this.trigger('end', [avgLatency, latencies]);
     };
 
