@@ -1,9 +1,9 @@
-define(['modules/basic'], function(BasicModule) {
+define(['modules/http'], function(HttpModule) {
 
     'use strict';
 
     var PingModule = function(endpoint) {
-        BasicModule.call(this, endpoint);
+        HttpModule.call(this, endpoint);
 
         this._requestsLeft = 0;
         this._latencies = [];
@@ -12,7 +12,7 @@ define(['modules/basic'], function(BasicModule) {
         this._initPingConfig();
     };
 
-    var fn = PingModule.prototype = Object.create(BasicModule.prototype);
+    var fn = PingModule.prototype = Object.create(HttpModule.prototype);
 
     fn.start = function() {
         // Set the number of requests required to establish the network latency. If the browser doesn't support the
