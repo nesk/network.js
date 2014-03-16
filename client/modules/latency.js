@@ -2,17 +2,17 @@ define(['modules/http'], function(HttpModule) {
 
     'use strict';
 
-    var PingModule = function(endpoint) {
+    var LatencyModule = function(endpoint) {
         HttpModule.call(this, endpoint);
 
         this._requestsLeft = 0;
         this._latencies = [];
         this._tmpRequestData = null;
 
-        this._initPingConfig();
+        this._initLatencyConfig();
     };
 
-    var fn = PingModule.prototype = Object.create(HttpModule.prototype);
+    var fn = LatencyModule.prototype = Object.create(HttpModule.prototype);
 
     fn.start = function() {
         // Set the number of requests required to establish the network latency. If the browser doesn't support the
@@ -24,7 +24,7 @@ define(['modules/http'], function(HttpModule) {
         this._nextRequest();
     };
 
-    fn._initPingConfig = function() {
+    fn._initLatencyConfig = function() {
         var _this = this;
 
         // Calculate the latency with the Performance API once the request is finished.
@@ -92,6 +92,6 @@ define(['modules/http'], function(HttpModule) {
     };
 
     // Class exposure.
-    return PingModule;
+    return LatencyModule;
 
 });

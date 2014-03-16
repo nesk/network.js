@@ -1,4 +1,4 @@
-require(['modules/ping', 'modules/bandwidth'], function(PingModule, BandwidthModule) {
+require(['modules/latency', 'modules/bandwidth'], function(LatencyModule, BandwidthModule) {
 
     'use strict';
 
@@ -8,7 +8,7 @@ require(['modules/ping', 'modules/bandwidth'], function(PingModule, BandwidthMod
         }
 
         this._modules = {};
-        this._setModule('ping', new PingModule(endpoint))
+        this._setModule('latency', new LatencyModule(endpoint))
             ._setModule('upload', new BandwidthModule(endpoint, 'upload'))
             ._setModule('download', new BandwidthModule(endpoint, 'download'));
     };
