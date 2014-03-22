@@ -1,4 +1,4 @@
-define(['modules/http'], function(HttpModule) {
+define(['modules/http', 'timing'], function(HttpModule, Timing) {
 
     'use strict';
 
@@ -7,7 +7,14 @@ define(['modules/http'], function(HttpModule) {
 
         this._requestsLeft = 0;
         this._latencies = [];
-        this._tmpRequestData = null;
+        this._requestID = 0;
+
+        // Unique labels for each request, exclusively used to make measures.
+        this._timingLabels = {
+            start: null,
+            end: null,
+            measure: null
+        };
 
         this._initLatencyConfig();
     };
@@ -16,19 +23,22 @@ define(['modules/http'], function(HttpModule) {
 
     fn.start = function() {
         // Set the number of requests required to establish the network latency. If the browser doesn't support the
-        // Performance API, add a request that will be ignored to avoid a longer request due to a possible DNS fetch.
+        // Resource Timing API, add a request that will be ignored to avoid a longer request due to a possible
+        // DNS/whatever fetch.
         this._requestsLeft = 5;
-        window.performance || this._requestsLeft++;
+        Timing.supportsResourceTiming() || this._requestsLeft++;
 
         this._latencies = [];
         this._nextRequest();
+
+        return this;
     };
 
     fn._initLatencyConfig = function() {
         var _this = this;
 
-        // Calculate the latency with the Performance API once the request is finished.
-        if (window.performance) {
+        // Calculate the latency with the Resource Timing API once the request is finished.
+        if (Timing.supportsResourceTiming()) {
             this.on('xhr-load', function() {
                 _this._getTimingEntry(function(entry) {
                     // The latency calculation differs between an HTTP and an HTTPS connection.
@@ -42,19 +52,22 @@ define(['modules/http'], function(HttpModule) {
             });
         }
 
-        // If the browser doesn't support the Performance API, we fallback on a Datetime solution.
+        // If the browser doesn't support the Resource Timing API, we fallback on a Datetime solution.
         else {
+            var labels = this._timingLabels;
+
+            // Set a mark when the request starts.
             this.on('xhr-loadstart', function() {
-                // Save the starting timestamp.
-                _this._tmpRequestData = (new Date()).getTime();
+                Timing.mark(labels.start);
             });
 
             this.on('xhr-readystatechange', function() {
                 // Ignore the first request (see the comments in the start() method) and calculate the latency if the
                 // headers have been received.
                 if (_this._requestsLeft < 5 && this.readyState == XMLHttpRequest.HEADERS_RECEIVED) {
-                    // Save the difference between the first and the last timestamp.
-                    _this._latencies.push((new Date()).getTime() - _this._tmpRequestData);
+                    // Save the timing measure.
+                    Timing.mark(labels.end);
+                    _this._latencies.push(Timing.measure(labels.measure, labels.start, labels.end));
                 }
             });
         }
@@ -67,6 +80,15 @@ define(['modules/http'], function(HttpModule) {
 
     fn._nextRequest = function() {
         if (this._requestsLeft--) {
+            var reqID = this._requestID++;
+
+            // Create unique timing labels for the new request.
+            var labels = this._timingLabels;
+            labels.start = 'latency-'+ reqID + '-start';
+            labels.end = 'latency-'+ reqID + '-end';
+            labels.measure = 'latency-'+ reqID + '-measure';
+
+            // Create the new request and send it.
             this._newRequest('GET')._sendRequest();
         } else {
             var _this = this;
