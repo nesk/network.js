@@ -8,6 +8,8 @@ define(['event-dispatcher'], function(EventDispatcher) {
         this._endpoint = endpoint;
         this._xhr = null;
         this._lastURLToken = null;
+
+        this._requestingOverridden = false;
         this._requesting = false;
 
         this._initHttpConfig();
@@ -22,19 +24,25 @@ define(['event-dispatcher'], function(EventDispatcher) {
     fn._initHttpConfig = function() {
         var _this = this;
 
+        // Set the requesting value unless it has been overridden with the _setRequesting() method.
         this.on('xhr-loadstart', function() {
-            _this._requesting = true;
+            if (!_this._requestingOverridden) {
+                _this._requesting = true;
+            }
         });
 
         this.on('xhr-loadend', function() {
-            _this._requesting = false;
+            if (!_this._requestingOverridden) {
+                _this._requesting = false;
+            }
         });
     };
 
     fn._newRequest = function(httpMethod, path) {
         // Check if a callback binded to the "_newRequest" event returns false, if it's the case, cancel the request
-        // creation.
-        if (!this.trigger('_newRequest')) {
+        // creation. If the requesting status has been overridden, there's no need to cancel the request since the user
+        // should know what he's doing.
+        if (!this.trigger('_newRequest') && !this._requestingOverridden) {
             console.warn('To ensure accurate measures, you can only make one request at a time.');
             return this;
         }
@@ -85,7 +93,12 @@ define(['event-dispatcher'], function(EventDispatcher) {
     };
 
     fn._sendRequest = function(data) {
-        this._xhr.send(typeof data != 'undefined' ? data : null);
+        if (this._xhr && this._xhr.readyState == XMLHttpRequest.OPENED) {
+            this._xhr.send(typeof data != 'undefined' ? data : null);
+        } else {
+            console.warn('A request must have been created before it can be sent.');
+        }
+
         return this;
     };
 
@@ -105,6 +118,11 @@ define(['event-dispatcher'], function(EventDispatcher) {
         })(this._lastURLToken), 0);
 
         return this;
+    };
+
+    fn._setRequesting = function(value) {
+        this._requestingOverridden = true;
+        this._requesting = value;
     };
 
     // Class exposure.

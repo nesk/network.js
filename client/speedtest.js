@@ -21,11 +21,11 @@ require(['modules/latency', 'modules/bandwidth'], function(LatencyModule, Bandwi
 
     fn.isRequesting = function() {
         var modules = this._modules,
-            requesting = true;
+            requesting = false;
 
         for (var i in modules) {
             if (modules.hasOwnProperty(i)) {
-                requesting = requesting && modules[i].isRequesting();
+                requesting = requesting || modules[i].isRequesting();
             }
         }
 

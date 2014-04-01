@@ -28,6 +28,9 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
         this._requestsLeft = 5;
         Timing.supportsResourceTiming() || this._requestsLeft++;
 
+        // Override the requesting value since a complete latency request consists off multiple ones.
+        this._setRequesting(true);
+
         this._latencies = [];
         this._nextRequest();
 
@@ -92,6 +95,9 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
             this._newRequest('GET')._sendRequest();
         } else {
             var _this = this;
+
+            // All the requests are finished, set the requesting status to false.
+            this._setRequesting(false);
 
             // If all the requests have been executed, calculate the average latency. Since the _getTimingEntry() method
             // is asynchronous, wait for the next process tick to execute the _calculate() method, to be sure that all
