@@ -19,9 +19,12 @@
   "homepage": "https://github.com/Nesk/SpeedTest",
   "devDependencies": {
     "gulp": "~3.5.2",
-    "gulp-requirejs": "~0.1.3",
     "gulp-uglify": "~0.2.1",
-    "almond": "~0.2.9"
+    "almond": "~0.2.9",
+    "requirejs": "^2.1.11",
+    "q": "^1.0.1",
+    "gulp-clean": "^0.2.4",
+    "gulp-rename": "^1.2.0"
   },
   "scripts": {
     "build": "gulp"
