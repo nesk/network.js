@@ -31,6 +31,7 @@ gulp.task('rjs-process', ['rjs-prepare'], function() {
         ],
 
         optimize: 'none',
+        useStrict: true,
         wrap: true,
 
         out: function(content) {
