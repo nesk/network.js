@@ -37,7 +37,7 @@ speed.module('download')
 To compile the project, install the latest version of [Node](http://nodejs.org/) and run these commands inside a terminal:
 
 ```
-git clone https://github.com/Nesk/jpardanaud-website.git
+git clone https://github.com/Nesk/SpeedTest.git
 cd SpeedTest
 git checkout v2.0.0
 npm install
