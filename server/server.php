@@ -11,6 +11,11 @@ if (!empty($_GET['module']) && $_GET['module'] == 'download') {
     header('Cache-Control: no-cache, no-store, no-transform');
     header('Pragma: no-cache'); // Support for HTTP 1.0.
 
+    // Disable gzip compression on Apache configurations.
+    if (function_exists('apache_setenv')) {
+        apache_setenv('no-gzip', '1');
+    }
+
     // Define a size for the response: 20MB for the moment, will be dynamic in the future.
     $contentSize = 20 * 1024 * 1024;
 

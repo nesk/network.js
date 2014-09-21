@@ -3,7 +3,7 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
     'use strict';
 
     var LatencyModule = function(endpoint) {
-        HttpModule.call(this, endpoint);
+        HttpModule.call(this, endpoint, 'latency');
 
         this._requestsLeft = 0;
         this._latencies = [];

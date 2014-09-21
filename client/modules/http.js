@@ -2,10 +2,11 @@ define(['event-dispatcher'], function(EventDispatcher) {
 
     'use strict';
 
-    var HttpModule = function(endpoint) {
+    var HttpModule = function(endpoint, moduleName) {
         EventDispatcher.call(this);
 
         this._endpoint = endpoint;
+        this._moduleName = moduleName;
         this._xhr = null;
         this._lastURLToken = null;
 
@@ -61,7 +62,10 @@ define(['event-dispatcher'], function(EventDispatcher) {
         // Resource Timing entries.
         this._lastURLToken = 'speedtest-'+ (new Date).getTime();
 
-        var url = this._endpoint + (typeof path != 'undefined' ? path : '') +'?'+ this._lastURLToken;
+        // TODO: We must handle the endpoints that already contains the "?" character.
+        var url = this._endpoint + (typeof path != 'undefined' ? path : '')
+                    +'?module='+ this._moduleName
+                    +'&'+ this._lastURLToken;
 
         xhr.open(httpMethod, url);
 

@@ -3,10 +3,12 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
     'use strict';
 
     var BandwidthModule = function(endpoint, loadingType) {
-        HttpModule.call(this, endpoint);
-
         var validLoadingTypes = ['upload', 'download'];
-        this._loadingType = (~validLoadingTypes.indexOf(loadingType)) ? loadingType : 'download';
+        var loadingType = (~validLoadingTypes.indexOf(loadingType)) ? loadingType : 'download';
+
+        HttpModule.call(this, endpoint, loadingType);
+
+        this._loadingType = loadingType;
 
         this._lastLoadedValue = null;
         this._speedRecords = [];
@@ -29,40 +31,43 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
     var fn = BandwidthModule.prototype = Object.create(HttpModule.prototype);
 
     fn.start = function() {
-        var reqID = this._requestID++;
+        var loadingType = this._loadingType,
+            reqID = this._requestID++;
 
         this._lastLoadedValue = null;
         this._speedRecords = [];
 
         // Create unique timing labels for the new request.
         var labels = this._timingLabels;
-        labels.start = 'upload-'+ reqID + '-start';
-        labels.progress = 'upload-'+ reqID + '-progress';
-        labels.end = 'upload-'+ reqID + '-end';
-        labels.measure = 'upload-'+ reqID + '-measure';
+        labels.start = loadingType +'-'+ reqID + '-start';
+        labels.progress = loadingType +'-'+ reqID + '-progress';
+        labels.end = loadingType +'-'+ reqID + '-end';
+        labels.measure = loadingType +'-'+ reqID + '-measure';
 
         // Generate some random data to upload to the server. Here we're using a Blob instead of an ArrayBuffer because
         // of a bug in Chrome (tested in v33.0.1750.146), causing a freeze of the page while trying to directly upload
         // an ArrayBuffer (through an ArrayBufferView). The freeze lasts nearly 4.5s for 10MB of data. Using a Blob
         // seems to solve the problem.
-        var blob = new Blob([new ArrayBuffer(1024*1024*20)]);
+        var blob = (loadingType == 'upload') ? new Blob([new ArrayBuffer(1024*1024*20)]) : null;
 
         // Initiate and send a new request.
         this._newRequest('POST')._sendRequest(blob);
     };
 
     fn._initBandwidthConfig = function() {
-        var _this = this;
+        var _this = this,
+            loadingType = this._loadingType,
+            eventsPrefix = (loadingType == 'upload') ? 'xhr-upload-' : 'xhr-';
 
-        this.on('xhr-upload-loadstart', function() {
+        this.on(eventsPrefix +'loadstart', function() {
             Timing.mark(_this._timingLabels.start);
         });
 
-        this.on('xhr-upload-progress', function(event) {
+        this.on(eventsPrefix +'progress', function(event) {
             _this._progress(event);
         });
 
-        this.on('xhr-upload-loadend', function(event) {
+        this.on(eventsPrefix +'loadend', function(event) {
             _this._end(event);
         });
     };
