@@ -2,13 +2,13 @@ _The v2 of SpeedTest is currently under development (with a very slooooow progre
 
 # SpeedTest
 
-A __JavaScript-only__ script which can measures various aspects of your current connection. It can estimate your upload/download bandwidth and your latency. Keep in mind that these estimations are only valid on the HTTP protocol and also between the server and the client you use for testing, it may change with another protocol/server/client.
+A __JavaScript-only__ script which can measures various aspects of your current connection. It can estimate your upload/download bandwidth and your latency. Keep in mind that these estimations are only valid on the HTTP(S) protocol and also between the server and the client you use for testing, it may change with another protocol/server/client.
 
 ## How to use
 
 ```javascript
 // Create a new SpeedTest instance by providing your endpoint, for example "http://myserver.com".
-var tests = new SpeedTest('/your_endpoint');
+var speed = new SpeedTest('/your_endpoint');
 
 // Access the latency module.
 var latency = speed.module('latency');
