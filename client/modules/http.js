@@ -25,18 +25,25 @@ define(['event-dispatcher'], function(EventDispatcher) {
     fn._initHttpConfig = function() {
         var _this = this;
 
-        // Set the requesting value unless it has been overridden with the _setRequesting() method.
-        this.on('xhr-loadstart', function() {
+        // Each time a request starts or ends, set the requesting value unless it has been overridden with the
+        // _setRequesting() method.
+        var loadstart = function() {
             if (!_this._requestingOverridden) {
                 _this._requesting = true;
             }
-        });
+        };
 
-        this.on('xhr-loadend', function() {
+        this.on('xhr-loadstart', loadstart);
+        this.on('xhr-upload-loadstart', loadstart);
+
+        var loadend = function() {
             if (!_this._requestingOverridden) {
                 _this._requesting = false;
             }
-        });
+        };
+
+        this.on('xhr-loadend', loadend);
+        this.on('xhr-upload-loadend', loadend);
     };
 
     fn._newRequest = function(httpMethod, path) {

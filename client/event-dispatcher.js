@@ -26,7 +26,7 @@ define(function() {
 
     fn.off = function(eventType, callback) {
         var events = this._events[eventType];
-        
+
         // If there is no specified callback, simply delete all the callbacks binded to the provided event type.
         if (typeof callback == 'undefined' && events) {
             delete this._events[eventType];
