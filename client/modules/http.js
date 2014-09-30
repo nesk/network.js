@@ -2,10 +2,23 @@ define(['event-dispatcher'], function(EventDispatcher) {
 
     'use strict';
 
-    var HttpModule = function(endpoint, moduleName) {
+    var HttpModule = function(moduleName, userOptions) {
         EventDispatcher.call(this);
 
-        this._endpoint = endpoint;
+        // Define default options and override them by the ones provided at instanciation.
+        userOptions = userOptions || {};
+
+        var options = {
+            endpoint: './speedtest.php',
+            delay: 8000
+        };
+
+        Object.keys(userOptions).forEach(function(key) {
+            options[key] = userOptions[key];
+        });
+
+        // Define the object properties.
+        this._options = options;
         this._moduleName = moduleName;
         this._xhr = null;
         this._lastURLToken = null;
@@ -13,6 +26,7 @@ define(['event-dispatcher'], function(EventDispatcher) {
         this._requestingOverridden = false;
         this._requesting = false;
 
+        // Initiate the object.
         this._initHttpConfig();
     };
 
@@ -28,6 +42,7 @@ define(['event-dispatcher'], function(EventDispatcher) {
         // Each time a request starts or ends, set the requesting value unless it has been overridden with the
         // _setRequesting() method.
         var loadstart = function() {
+            console.log
             if (!_this._requestingOverridden) {
                 _this._requesting = true;
             }
@@ -46,7 +61,7 @@ define(['event-dispatcher'], function(EventDispatcher) {
         this.on('xhr-upload-loadend', loadend);
     };
 
-    fn._newRequest = function(httpMethod, path) {
+    fn._newRequest = function(httpMethod, queryParams) {
         // Check if a callback binded to the "_newRequest" event returns false, if it's the case, cancel the request
         // creation. If the requesting status has been overridden, there's no need to cancel the request since the user
         // should know what he's doing.
@@ -56,6 +71,7 @@ define(['event-dispatcher'], function(EventDispatcher) {
         }
 
         var _this = this,
+            options = this._options,
             xhr = new XMLHttpRequest(),
             validHttpMethods = ['GET', 'POST'];
 
@@ -65,14 +81,24 @@ define(['event-dispatcher'], function(EventDispatcher) {
             return this;
         }
 
+        queryParams = queryParams || {};
+
+        // Define the timeout of the request.
+        xhr.timeout = options.delay;
+
         // Generate an URL token to avoid any caching issues. This token will also allow to identify the request in the
         // Resource Timing entries.
         this._lastURLToken = 'speedtest-'+ (new Date).getTime();
 
-        // TODO: We must handle the endpoints that already contains the "?" character.
-        var url = this._endpoint + (typeof path != 'undefined' ? path : '')
-                    +'?module='+ this._moduleName
-                    +'&'+ this._lastURLToken;
+        // Append the query parameters.
+        var url = options.endpoint;
+            url += (~url.indexOf('?') ? ':' : '?') + 'module=' + this._moduleName;
+
+        Object.keys(queryParams).forEach(function(param) {
+            url += '&' + param + '=' + encodeURIComponent(queryParams[param]);
+        });
+
+        url += '&' + this._lastURLToken;
 
         xhr.open(httpMethod, url);
 
@@ -89,6 +115,11 @@ define(['event-dispatcher'], function(EventDispatcher) {
 
         eventTypes.forEach(function(eventType) {
             xhr.addEventListener(eventType, function() {
+                // A last progress event can be triggered once a request has timed out, ignore it.
+                if (eventType == 'progress' && !_this._requesting) {
+                    return;
+                }
+
                 _this.trigger('xhr-'+ eventType, arguments, xhr);
             });
 

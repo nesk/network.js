@@ -16,8 +16,13 @@ if (!empty($_GET['module']) && $_GET['module'] == 'download') {
         apache_setenv('no-gzip', '1');
     }
 
-    // Define a size for the response: 20MB for the moment, will be dynamic in the future.
+    // Define a content size for the response, defaults to 20MB.
     $contentSize = 20 * 1024 * 1024;
+
+    if (!empty($_GET['size'])) {
+        $contentSize = intval($_GET['size']);
+        $contentSize = min($contentSize, 200 * 1024 * 1024); // Maximum value: 200MB.
+    }
 
     // Provide a base string which will be provided as a response to the client.
     $baseString = 'This text is so uncool, deal with it. ';

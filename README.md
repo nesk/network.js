@@ -7,40 +7,53 @@ A __JavaScript-only__ script which can measures various aspects of your current 
 ## How to use
 
 ```javascript
-// Create a new SpeedTest instance by providing your endpoint, for example "http://myserver.com".
-var speed = new SpeedTest('/your_endpoint');
+// Create a new SpeedTest instance by providing an optional object.
+var speed = new SpeedTest({
+    endpoint: './speedtest.php', // Where is located your `speedtest.php` file.
+    delay: 8 // For each bandwidth measure, the delay while you want to take measures.
+});
 
 // Access the latency module.
 var latency = speed.module('latency');
 
 // Listen for the "end" event which provides the calculated latencies.
 latency.on('end', function(averageLatency, allLatencies) {
-    // "allLatencies" is an array containing the five calculated latencies in milliseconds. They're used to determine an average latency.
-    console.log(averageLatency, allLatencies);
+    // "allLatencies" is an array containing the five calculated latencies in
+    // milliseconds. They're used to determine an average latency.
+    console.log('end', averageLatency, allLatencies);
 });
 
 // Once all the configuration is done, start the requests for this module.
 latency.start();
 
-// It is possible to chain functions for all the modules, here's an example with the upload module.
+// It is possible to chain functions for all the modules, here's an example with the
+// upload module.
 speed.module('upload')
-        .on('progress', function(averageSpeed, instantSpeed) {
-            console.log(averageSpeed, instantSpeed);
-        })
-        .on('end', function(averageSpeed, allInstantSpeeds) {
-            console.log(averageSpeed, allInstantSpeeds);
-        })
-        .start();
+     .on('progress', function(averageSpeed, instantSpeed) {
+         console.log('progress', averageSpeed, instantSpeed);
+     })
+     .on('restart', function(dataSize) {
+         // The restart event is triggered when the module didn't have time
+         // (according to the `delay` option) to take all the measures. A new
+         // request will start with data length increased by 2.
+         console.log('restart', dataSize);
+     })
+     .on('end', function(averageSpeed, allInstantSpeeds) {
+         console.log('end', averageSpeed, allInstantSpeeds);
+     })
+     .start();
 
-// The download module isn't usable for now.
 speed.module('download')
-        .on('progress', function(averageSpeed, instantSpeed) {
-            console.log(averageSpeed, instantSpeed);
-        })
-        .on('end', function(averageSpeed, allInstantSpeeds) {
-            console.log(averageSpeed, allInstantSpeeds);
-        })
-        .start();
+     .on('progress', function(averageSpeed, instantSpeed) {
+         console.log('progress', averageSpeed, instantSpeed);
+     })
+     .on('restart', function(dataSize) {
+         console.log('restart', dataSize);
+     })
+     .on('end', function(averageSpeed, allInstantSpeeds) {
+         console.log('end', averageSpeed, allInstantSpeeds);
+     })
+     .start();
 ```
 
 ## Compilation

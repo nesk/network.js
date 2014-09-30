@@ -2,13 +2,16 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
 
     'use strict';
 
-    var BandwidthModule = function(endpoint, loadingType) {
+    var BandwidthModule = function(loadingType, options) {
         var validLoadingTypes = ['upload', 'download'];
         var loadingType = (~validLoadingTypes.indexOf(loadingType)) ? loadingType : 'download';
 
-        HttpModule.call(this, endpoint, loadingType);
+        HttpModule.call(this, loadingType, options);
 
         this._loadingType = loadingType;
+
+        this._dataAmount = 10 * 1024 * 1024; // Defaults to 10MB
+        this._timeoutOccured = false;
 
         this._lastLoadedValue = null;
         this._speedRecords = [];
@@ -34,6 +37,7 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
         var loadingType = this._loadingType,
             reqID = this._requestID++;
 
+        this._timeoutOccured = false;
         this._lastLoadedValue = null;
         this._speedRecords = [];
 
@@ -48,10 +52,12 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
         // of a bug in Chrome (tested in v33.0.1750.146), causing a freeze of the page while trying to directly upload
         // an ArrayBuffer (through an ArrayBufferView). The freeze lasts nearly 4.5s for 10MB of data. Using a Blob
         // seems to solve the problem.
-        var blob = (loadingType == 'upload') ? new Blob([new ArrayBuffer(1024*1024*20)]) : null;
+        var blob = (loadingType == 'upload') ? new Blob([new ArrayBuffer(this._dataAmount)]) : null;
 
         // Initiate and send a new request.
-        this._newRequest('POST')._sendRequest(blob);
+        this._newRequest('POST', {
+            size: this._dataAmount
+        })._sendRequest(blob);
     };
 
     fn._initBandwidthConfig = function() {
@@ -67,8 +73,12 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
             _this._progress(event);
         });
 
-        this.on(eventsPrefix +'loadend', function(event) {
-            _this._end(event);
+        this.on(eventsPrefix +'timeout', function() {
+            _this._timeout();
+        });
+
+        this.on(eventsPrefix +'loadend', function() {
+            _this._end();
         });
     };
 
@@ -113,8 +123,22 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
         this.trigger('progress', [avgSpeed, instantSpeed]);
     };
 
-    fn._end = function(event) {
-        this.trigger('end', [this._avgSpeed, this._speedRecords]);
+    fn._timeout = function() {
+        this._timeoutOccured = true;
+    };
+
+    fn._end = function() {
+        // A timeout occured, we have enough data, abort the request and trigger the "end" event.
+        if (this._timeoutOccured) {
+            this.trigger('end', [this._avgSpeed, this._speedRecords]);
+        }
+
+        // The request ended to early, restart it with an increased data volume.
+        else {
+            this._dataAmount *= 2;
+            this.trigger('restart', [this._dataAmount]);
+            this.start();
+        }
     };
 
     // Class exposure.

@@ -2,15 +2,12 @@ require(['modules/latency', 'modules/bandwidth'], function(LatencyModule, Bandwi
 
     'use strict';
 
-    var SpeedTest = function(endpoint) {
-        if (typeof endpoint == 'undefined') {
-            console.warn('An endpoint should be provided when a new SpeedTest object is instanciated.');
-        }
-
+    var SpeedTest = function(options) {
+        // Initialize the modules.
         this._modules = {};
-        this._setModule('latency', new LatencyModule(endpoint))
-            ._setModule('upload', new BandwidthModule(endpoint, 'upload'))
-            ._setModule('download', new BandwidthModule(endpoint, 'download'));
+        this._setModule('latency', new LatencyModule(options))
+            ._setModule('upload', new BandwidthModule('upload', options))
+            ._setModule('download', new BandwidthModule('download', options));
     };
 
     var fn = SpeedTest.prototype;

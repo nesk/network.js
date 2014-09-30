@@ -2,8 +2,11 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
 
     'use strict';
 
-    var LatencyModule = function(endpoint) {
-        HttpModule.call(this, endpoint, 'latency');
+    var LatencyModule = function(options) {
+        options = options || {};
+        options.delay = 0; // We dont want any timeout during a latency calculation.
+
+        HttpModule.call(this, 'latency', options);
 
         this._requestsLeft = 0;
         this._latencies = [];
@@ -111,7 +114,7 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
     fn._calculate = function() {
         var latencies = this._latencies,
             isThereAnyZeroLatency = false;
-        
+
         // Get the average latency.
         var avgLatency = latencies.reduce(function(a, b) {
             // Check if there is any latency equal to zero.
