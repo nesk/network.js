@@ -8,9 +8,20 @@ A __JavaScript-only__ script which can measures various aspects of your current 
 
 ```javascript
 // Create a new SpeedTest instance by providing an optional object.
+// N.B. The following options are the default ones.
 var speed = new SpeedTest({
     endpoint: './speedtest.php', // Where is located your `speedtest.php` file.
-    delay: 8 // For each bandwidth measure, the delay while you want to take measures.
+    delay: 8, // The delay while you want to take measures for a bandwidth measure.
+
+    // Defines the amount of data to initially use for each bandwidth module.
+    dataSize: {
+        upload: 2 * 1024 * 1024, // 2 MB
+        download: 10 * 1024 * 1024, // 10 MB
+
+        // If the measure period can't reach the delay defined in the options, the
+        // data amount is increased by the multiplier value.
+        multiplier: 2
+    }
 });
 
 // Access the latency module.
@@ -29,13 +40,16 @@ latency.start();
 // It is possible to chain functions for all the modules, here's an example with the
 // upload module.
 speed.module('upload')
+     .on('start', function(dataSize) {
+         console.log('start', dataSize);
+     })
      .on('progress', function(averageSpeed, instantSpeed) {
          console.log('progress', averageSpeed, instantSpeed);
      })
      .on('restart', function(dataSize) {
          // The restart event is triggered when the module didn't have time
          // (according to the `delay` option) to take all the measures. A new
-         // request will start with data length increased by 2.
+         // request will start with data size increased by the multiplier value.
          console.log('restart', dataSize);
      })
      .on('end', function(averageSpeed, allInstantSpeeds) {
@@ -44,6 +58,9 @@ speed.module('upload')
      .start();
 
 speed.module('download')
+     .on('start', function(dataSize) {
+         console.log('start', dataSize);
+     })
      .on('progress', function(averageSpeed, instantSpeed) {
          console.log('progress', averageSpeed, instantSpeed);
      })

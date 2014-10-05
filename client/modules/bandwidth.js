@@ -1,17 +1,28 @@
-define(['modules/http', 'timing'], function(HttpModule, Timing) {
+define(['modules/http', 'timing', 'utilities'], function(HttpModule, Timing, Utilities) {
 
     'use strict';
 
     var BandwidthModule = function(loadingType, options) {
         var validLoadingTypes = ['upload', 'download'];
-        var loadingType = (~validLoadingTypes.indexOf(loadingType)) ? loadingType : 'download';
+        loadingType = (~validLoadingTypes.indexOf(loadingType)) ? loadingType : 'download';
 
+        // Define default options and override them by the ones provided at instanciation.
+        options = Utilities.extend({
+            dataSize: {
+                upload: 2 * 1024 * 1024, // 2 MB
+                download: 10 * 1024 * 1024, // 10 MB
+                multiplier: 2
+            }
+        }, options);
+
+        // Call parent constructor.
         HttpModule.call(this, loadingType, options);
 
+        // Define the object properties.
         this._loadingType = loadingType;
 
-        this._dataAmount = 10 * 1024 * 1024; // Defaults to 10MB
         this._timeoutOccured = false;
+        this._isRestarting = false;
 
         this._lastLoadedValue = null;
         this._speedRecords = [];
@@ -28,6 +39,7 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
             measure: null
         };
 
+        // Initiate the object.
         this._initBandwidthConfig();
     };
 
@@ -35,11 +47,17 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
 
     fn.start = function() {
         var loadingType = this._loadingType,
+            dataSize = this._options.dataSize,
             reqID = this._requestID++;
 
         this._timeoutOccured = false;
         this._lastLoadedValue = null;
         this._speedRecords = [];
+
+        // Trigger the start event.
+        if (!this._isRestarting) {
+            this.trigger('start', [(loadingType == 'upload') ? dataSize.upload : dataSize.download]);
+        }
 
         // Create unique timing labels for the new request.
         var labels = this._timingLabels;
@@ -52,11 +70,11 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
         // of a bug in Chrome (tested in v33.0.1750.146), causing a freeze of the page while trying to directly upload
         // an ArrayBuffer (through an ArrayBufferView). The freeze lasts nearly 4.5s for 10MB of data. Using a Blob
         // seems to solve the problem.
-        var blob = (loadingType == 'upload') ? new Blob([new ArrayBuffer(this._dataAmount)]) : null;
+        var blob = (loadingType == 'upload') ? new Blob([new ArrayBuffer(dataSize.upload)]) : null;
 
         // Initiate and send a new request.
         this._newRequest('POST', {
-            size: this._dataAmount
+            size: dataSize.download
         })._sendRequest(blob);
     };
 
@@ -130,13 +148,21 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
     fn._end = function() {
         // A timeout occured, we have enough data, abort the request and trigger the "end" event.
         if (this._timeoutOccured) {
+            this._isRestarting = false;
             this.trigger('end', [this._avgSpeed, this._speedRecords]);
         }
 
-        // The request ended to early, restart it with an increased data volume.
+        // The request ended to early, restart it with an increased data size.
         else {
-            this._dataAmount *= 2;
-            this.trigger('restart', [this._dataAmount]);
+            var loadingType = this._loadingType,
+                dataSize = this._options.dataSize;
+
+            dataSize.upload *= dataSize.multiplier;
+            dataSize.download *= dataSize.multiplier;
+
+            this.trigger('restart', [(loadingType == 'upload') ? dataSize.upload : dataSize.download]);
+
+            this._isRestarting = true;
             this.start();
         }
     };

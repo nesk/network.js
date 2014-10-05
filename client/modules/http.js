@@ -1,21 +1,16 @@
-define(['event-dispatcher'], function(EventDispatcher) {
+define(['event-dispatcher', 'utilities'], function(EventDispatcher, Utilities) {
 
     'use strict';
 
-    var HttpModule = function(moduleName, userOptions) {
+    var HttpModule = function(moduleName, options) {
+        // Call parent constructor.
         EventDispatcher.call(this);
 
         // Define default options and override them by the ones provided at instanciation.
-        userOptions = userOptions || {};
-
-        var options = {
+        options = Utilities.extend({
             endpoint: './speedtest.php',
             delay: 8000
-        };
-
-        Object.keys(userOptions).forEach(function(key) {
-            options[key] = userOptions[key];
-        });
+        }, options);
 
         // Define the object properties.
         this._options = options;
@@ -42,7 +37,6 @@ define(['event-dispatcher'], function(EventDispatcher) {
         // Each time a request starts or ends, set the requesting value unless it has been overridden with the
         // _setRequesting() method.
         var loadstart = function() {
-            console.log
             if (!_this._requestingOverridden) {
                 _this._requesting = true;
             }
@@ -92,7 +86,7 @@ define(['event-dispatcher'], function(EventDispatcher) {
 
         // Append the query parameters.
         var url = options.endpoint;
-            url += (~url.indexOf('?') ? ':' : '?') + 'module=' + this._moduleName;
+            url += (~url.indexOf('?') ? '&' : '?') + 'module=' + this._moduleName;
 
         Object.keys(queryParams).forEach(function(param) {
             url += '&' + param + '=' + encodeURIComponent(queryParams[param]);

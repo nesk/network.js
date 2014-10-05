@@ -1,13 +1,18 @@
-define(['modules/http', 'timing'], function(HttpModule, Timing) {
+define(['modules/http', 'timing', 'utilities'], function(HttpModule, Timing, Utilities) {
 
     'use strict';
 
     var LatencyModule = function(options) {
-        options = options || {};
-        options.delay = 0; // We dont want any timeout during a latency calculation.
+        // We dont want any timeout during a latency calculation. Here we are using extend() because we want to edit the
+        // delay on a clone of the object and not the original one.
+        options = Utilities.extend(options, {
+            delay: 0
+        });
 
+        // Call parent constructor.
         HttpModule.call(this, 'latency', options);
 
+        // Define the object properties.
         this._requestsLeft = 0;
         this._latencies = [];
         this._requestID = 0;
@@ -19,6 +24,7 @@ define(['modules/http', 'timing'], function(HttpModule, Timing) {
             measure: null
         };
 
+        // Initiate the object.
         this._initLatencyConfig();
     };
 
