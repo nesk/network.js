@@ -1,8 +1,23 @@
-_The v2 of SpeedTest is currently under development (with a very slooooow progression, [you're free to help](#contribution) if you want it to progress faster), if you try to use it now you will probably hate me, I suggest you to wait for a first release. Because it will be a v2, there was a v1 but I do not recommend you to use it too, it's probably the most unstable code I've ever written and the v2 is a complete rewrite._
+# SpeedTest (under development)
 
-# SpeedTest
+A __JavaScript__ library to measure various aspects of a connection. It can accurately estimate a bandwidth/latency between a client (using a web browser) and a server (running a specific script).
 
-A __JavaScript-only__ script which can measures various aspects of your current connection. It can estimate your upload/download bandwidth and your latency. Keep in mind that these estimations are only valid on the HTTP(S) protocol and also between the server and the client you use for testing, it may change with another protocol/server/client.
+## Compatibility
+
+SpeedTest is based on two browser features: [Resource Timing](http://caniuse.com/#feat=resource-timing) and [XMLHttpRequest (v2)](http://caniuse.com/#feat=xhr2). While the first one [can be polyfilled](client/timing.js), the second one is a requirement.
+
+Thus, SpeedTest should be compatible with:
+
+* Internet Explorer 10+
+* Firefox 12+ [(Surprised? Read this…)](https://github.com/Fyrd/caniuse/blob/master/features-json/xhr2.json#L22)
+* Chrome 29+ [(Surprised? Read this…)](https://github.com/Fyrd/caniuse/blob/master/features-json/xhr2.json#L22)
+* Safari 5+ (5.1+ for the mobile version)
+* Opera 12+
+* Android Webkit 3+
+
+__However!!__ Until SpeedTest is released in it's final version, I recommend you to use the latest version of Chrome, which implements all the required features.
+
+Please note that browsers using the Resource Timing polyfill could return __inaccurate measures__, especially __for latency calculations__.
 
 ## How to use
 
@@ -44,6 +59,7 @@ speed.module('upload')
          console.log('start', dataSize);
      })
      .on('progress', function(averageSpeed, instantSpeed) {
+         // Every bandwidth measure are in Mega BYTES per second!
          console.log('progress', averageSpeed, instantSpeed);
      })
      .on('restart', function(dataSize) {
