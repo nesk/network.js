@@ -130,7 +130,7 @@ define(['modules/http', 'timing', 'utilities'], function(HttpModule, Timing, Uti
         }) / latencies.length;
 
         // If there is any zero latency, display a warning.
-        console.warn([
+        isThereAnyZeroLatency && console.warn([
             'At least one latency returned a zero value, this can be due to the configuration of your web server which',
             'is probably using persistant connections. Check the documentation to solve this problem.'
         ].join(' '));
