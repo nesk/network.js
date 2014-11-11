@@ -13,7 +13,7 @@ define(function() {
     staticScope._support = {
         performance: !!window.performance,
         userTiming: window.performance && performance.mark,
-        resourceTiming: window.performance && performance.timing
+        resourceTiming: window.performance && (typeof(performance.getEntriesByType) == "function") && performance.timing
     };
 
     staticScope.mark = function(label) {
