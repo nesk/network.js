@@ -77,9 +77,6 @@ define(['event-dispatcher', 'utilities'], function(EventDispatcher, Utilities) {
 
         queryParams = queryParams || {};
 
-        // Define the timeout of the request.
-        xhr.timeout = options.delay;
-
         // Generate an URL token to avoid any caching issues. This token will also allow to identify the request in the
         // Resource Timing entries.
         this._lastURLToken = 'speedtest-'+ (new Date).getTime();
@@ -95,6 +92,9 @@ define(['event-dispatcher', 'utilities'], function(EventDispatcher, Utilities) {
         url += '&' + this._lastURLToken;
 
         xhr.open(httpMethod, url);
+
+        // Define the timeout of the request.
+        xhr.timeout = options.delay;
 
         // Abort the previous request if it hasn't been sent.
         if (this._xhr && this._xhr.readyState == XMLHttpRequest.OPENED) {
