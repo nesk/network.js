@@ -72,8 +72,10 @@ define(['modules/http', 'timing', 'utilities'], function(HttpModule, Timing, Uti
         // seems to solve the problem.
         var blob = (loadingType == 'upload') ? new Blob([new ArrayBuffer(dataSize.upload)]) : null;
 
+        var type = (loadingType == 'download') ? 'GET' : 'POST';
+
         // Initiate and send a new request.
-        this._newRequest('POST', {
+        this._newRequest(type, {
             size: dataSize.download
         })._sendRequest(blob);
     };
