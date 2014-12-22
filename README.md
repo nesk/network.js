@@ -110,7 +110,25 @@ There's also a `watch` task which compiles the project whenever a file is change
 
 The project is divided in two parts. One client and many servers (currently, there's only the PHP version). The goal is to provide a few servers for various platforms (PHP, Node, .Net, Python, etc...).
 
-The server part has only one job: respond to the client. It has to provide correct headers for the latency tests (check the code), configure the platform to allow large uploads and return large chunks of data for the download tests.
+### Server
+
+The server part has only one job: respond to the client. It must provide appropriate headers for the latency tests, configure the platform to allow large uploads and return large chunks of data for the download tests.
+
+If you want to contribute by creating a server in any language or with any platform you want, here's some simple guidelines to help you:
+
+* Don't let HTTP connections opened (disabled them, or use HTTP 1.0, the latest isn't recommended). The latency calculations are based on the time it takes for the client to establish an HTTP connection with the server, if a connection is still open you will get a 0 latency for each test.
+* Disable every caching capabilities of client browsers or proxies. Take a look at the `Cache-Control` and `Pragma` headers.
+* Disable all types of compression, like __gzip__.
+
+You will need to handle a single endpoint, it must return an empty response with a `200` HTTP code when a `GET` request is made. At this point, latency calculations _should work_. Your server __must__ support binary file uploads on this endpoint, check your environment configuration if you have any issues.
+
+Finally, the endpoint should return generated data when the client measures the download bandwidth. You can identify this scenario by checking if the `module` query parameter is equal to `"download"`.
+
+The easiest way to generate some data is to return a simple string concatenated multiple times to finally get the appropriate size and return it to the client. If you can easily generate some random binary data, prefer this option. You should, by default, return a `20MB` size but the client can override this value by providing a size __in Bytes__ through the `size` query parameter. Since the client can define this value, make sure to define a maximum value, I recommend `200MB`.
+
+That's it for the server part, [check my PHP implementation](server/server.php) if you need some context.
+
+### Client
 
 The client part is divided into many files that are compiled with [RequireJS](http://requirejs.org/). It is composed of one main class (`SpeedTest`) which is divided into modules: _latency_ (`LatencyModule`), _upload_ (`BandwidthModule`), _download_ (`BandwidthModule`). Each of them inherits from the _http_ module (`HttpModule`) which inherits from the _event dispatcher_ (`EventDispatcher`).
 
