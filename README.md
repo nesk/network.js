@@ -15,9 +15,14 @@ Thus, SpeedTest should be compatible with:
 * Opera 12+
 * Android Webkit 3+
 
-__However!!__ Until SpeedTest is released in it's final version, I recommend you to use the latest version of Chrome, which implements all the required features.
+__However!!__ Until SpeedTest is released in its final version, I recommend you to use the latest version of Chrome, which implements all the required features.
 
 Please note that browsers using the Resource Timing polyfill could return __inaccurate measures__, especially __for latency calculations__.
+
+## Caveats
+
+* Latency measures can be very far from reality if the browser doesn't support the [Resource Timing API](http://caniuse.com/#feat=resource-timing).
+* Currently, the client and the server must be on the same domain or measures can't be done due to the [same-origin policy](http://en.wikipedia.org/wiki/Same-origin_policy).
 
 ## How to use
 
