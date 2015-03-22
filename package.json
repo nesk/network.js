@@ -1,10 +1,10 @@
 {
-  "name": "SpeedTest",
+  "name": "speedtest",
   "version": "2.0.0-alpha",
-  "description": "Test your connection speed without Flash : only JavaScript!",
+  "description": "Test your connection speed without Flash: only JavaScript!",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Nesk/SpeedTest.git"
+    "url": "https://github.com/nesk/speedtest.git"
   },
   "keywords": [
     "speed",
@@ -14,17 +14,16 @@
   "author": "Johann Pardanaud",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Nesk/SpeedTest/issues"
+    "url": "https://github.com/nesk/speedtest/issues"
   },
-  "homepage": "https://github.com/Nesk/SpeedTest",
+  "homepage": "https://github.com/nesk/speedtest",
   "devDependencies": {
-    "gulp": "~3.5.2",
-    "gulp-uglify": "~0.2.1",
-    "almond": "~0.2.9",
-    "requirejs": "^2.1.11",
-    "q": "^1.0.1",
-    "gulp-clean": "^0.2.4",
-    "gulp-rename": "^1.2.0"
+    "browserify": "^9.0.3",
+    "gulp": "^3.8.11",
+    "gulp-rename": "^1.2.0",
+    "gulp-uglify": "^1.1.0",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {
     "build": "gulp"
