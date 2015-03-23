@@ -1,9 +1,9 @@
-.btn-toolbar .btn-group {
-    margin-top: 9px;
+.btn-toolbar {
+    margin-bottom: 9px;
 }
 
-.btn-toolbar .btn-group:last-child {
-    margin-bottom: 9px;
+.btn-toolbar .btn-group {
+    margin-top: 9px;
 }
 
 output {
@@ -28,4 +28,16 @@ output {
 
 .blue {
     color: #7aabd4;
+}
+
+@media (max-width:480px) {
+
+    .btn-toolbar {
+        text-align: center;
+    }
+
+    .btn-toolbar .btn-group {
+        float: none;
+    }
+
 }
