@@ -78,6 +78,9 @@ speed.module('upload')
      })
      .start();
 
+// You can also cancel a request (except for the "latency" module).
+speed.module('upload').abort();
+
 speed.module('download')
      .on('start', function(dataSize) {
          console.log('start', dataSize);
@@ -92,6 +95,8 @@ speed.module('download')
          console.log('end', averageSpeed, allInstantSpeeds);
      })
      .start();
+
+speed.module('download').abort();
 ```
 
 ## Compilation
