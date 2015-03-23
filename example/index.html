@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <title>SpeedTest</title>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./main.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>SpeedTest <small>Make accurate network measures in JavaScript</small></h1>
+        </div>
+
+        <p>
+            A <strong>JavaScript</strong> library to measure various aspects of a connection. It can accurately estimate a bandwidth/latency between a client (using a web browser) and a server (running a specific script).
+        </p>
+
+        <p>
+            If you have a really fast connection (like a fiber), you may see low bandwidth measures compared to what your connection can really deliver. This is simply due to my server which only supports a bandwidth up to 11 MBps. Yep, that sucks.
+        </p>
+
+        <p class="text-center">
+            <a href="https://github.com/Nesk/SpeedTest" class="btn btn-primary btn-lg" type="button">
+                Get the source on Github <span class="fa fa-github"></span>
+            </a>
+        </p>
+
+        <form>
+            <fieldset>
+                <legend>Network measures</legend>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="btn-toolbar">
+                            <div class="btn-group" data-toggle="tooltip" title="[Bug] 0 values can occur">
+                                <button class="btn btn-default" type="button" data-measure="latency">
+                                    <span class="glyphicon glyphicon-time"></span> Latency
+                                </button>
+                            </div>
+
+                            <div class="btn-group">
+                                <button class="btn btn-default" type="button" data-measure="upload">
+                                    <span class="glyphicon glyphicon-upload"></span> Upload
+                                </button>
+                                <button class="btn btn-default" type="button" data-measure="download">
+                                    <span class="glyphicon glyphicon-download"></span> Download
+                                </button>
+                            </div>
+
+                            <div class="btn-group">
+                                <button class="btn btn-default" type="button" data-abort disabled>
+                                    <span class="glyphicon glyphicon-remove-circle"></span> Abort
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="alert alert-warning" role="alert">
+                            Currently, it is recommended to use <strong>Chrome's latest version</strong>.
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <output>Click one of the above buttons to start network measures…</output>
+        </form>
+    </div>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/tooltip.min.js"></script>
+    <script src="./speedtest.min.js"></script>
+    <script src="./main.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+.btn-toolbar .btn-group {
+    margin-top: 9px;
+}
+
+.btn-toolbar .btn-group:last-child {
+    margin-bottom: 9px;
+}
+
+output {
+    margin-bottom: 40px;
+    border-radius: 4px;
+    height: 350px;
+    padding: 9.5px;
+    background-color: #2d2d2d;
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+    font-size: 90%;
+    color: #fff;
+    overflow: auto;
+}
+
+.green {
+    color: #a9d3ab;
+}
+
+.yellow {
+    color: #fed37f;
+}
+
+.blue {
+    color: #7aabd4;
+}
