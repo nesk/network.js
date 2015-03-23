@@ -1,4 +1,4 @@
-$(window).on('load', function() {
+$(function() {
 
     var module; // Current SpeedTest's module
 
@@ -51,7 +51,6 @@ $(window).on('load', function() {
         },
 
         abort: function() {
-            //speed.module('latency').abort();
             speed.module('upload').abort();
             speed.module('download').abort();
         },

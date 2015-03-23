@@ -139,6 +139,14 @@ fn._sendRequest = function(data) {
     return this;
 };
 
+fn._abort = function() {
+    if (this._xhr) {
+        this._xhr.abort();
+    }
+
+    return this;
+};
+
 fn._getTimingEntry = function(callback) {
     // The Resource Timing entries aren't immediately available once the 'load' event is triggered by an
     // XMLHttpRequest, we must wait for another process tick to check for a refreshed list.

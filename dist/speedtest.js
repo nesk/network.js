@@ -133,7 +133,7 @@ var BandwidthModule = module.exports = function(loadingType, options) {
     // Define the object properties.
     this._loadingType = loadingType;
 
-    this._timeoutOccured = false;
+    this._intendedEnd = false;
     this._isRestarting = false;
 
     this._lastLoadedValue = null;
@@ -162,7 +162,7 @@ fn.start = function() {
         dataSize = this._options.dataSize,
         reqID = this._requestID++;
 
-    this._timeoutOccured = false;
+    this._intendedEnd = false;
     this._lastLoadedValue = null;
     this._speedRecords = [];
 
@@ -190,6 +190,11 @@ fn.start = function() {
     this._newRequest(type, {
         size: dataSize.download
     })._sendRequest(blob);
+};
+
+fn.abort = function() {
+    this._intendedEnd = true;
+    return this._abort();
 };
 
 fn._initBandwidthConfig = function() {
@@ -256,12 +261,12 @@ fn._progress = function(event) {
 };
 
 fn._timeout = function() {
-    this._timeoutOccured = true;
+    this._intendedEnd = true;
 };
 
 fn._end = function() {
-    // A timeout occured, we have enough data, abort the request and trigger the "end" event.
-    if (this._timeoutOccured) {
+    // A timeout or an abort occured, bypass the further requests and trigger the "end" event.
+    if (this._intendedEnd) {
         this._isRestarting = false;
         this.trigger('end', [this._avgSpeed, this._speedRecords]);
     }
@@ -418,6 +423,14 @@ fn._sendRequest = function(data) {
         this._xhr.send(typeof data != 'undefined' ? data : null);
     } else {
         console.warn('A request must have been created before it can be sent.');
+    }
+
+    return this;
+};
+
+fn._abort = function() {
+    if (this._xhr) {
+        this._xhr.abort();
     }
 
     return this;
