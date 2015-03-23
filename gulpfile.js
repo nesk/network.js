@@ -6,6 +6,7 @@ var path = require('path');
 
 var browserify = require('browserify'),
     buffer = require('vinyl-buffer'),
+    chalk = require('chalk'),
     exorcist = require('exorcist'),
     gulp = require('gulp'),
     source = require('vinyl-source-stream');
@@ -20,7 +21,8 @@ var rename = require('gulp-rename'),
 
 var paths = {
     src: './client/speedtest.js',
-    dest: 'dist'
+    dest: 'dist',
+    watch: 'client/**'
 };
 
 var names = {
@@ -48,4 +50,13 @@ gulp.task('default', function() {
         .pipe(rename(names.min))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.dest));
+});
+
+gulp.task('watch', function(cb) {
+    var watcher = gulp.watch(paths.watch, ['default']);
+
+    watcher.on('change', function(event) {
+        var type = event.type.toUpperCase().slice(0, 1) + event.type.toLowerCase().slice(1);
+        console.log('\n' + chalk.yellow(type + ': ') + chalk.magenta(event.path) + '\n');
+    });
 });

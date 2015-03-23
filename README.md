@@ -26,7 +26,7 @@ Please note that browsers using the Resource Timing polyfill could return __inac
 
 ## How to use
 
-```javascript
+```js
 // Create a new SpeedTest instance by providing an optional object.
 // N.B. The following options are the default ones.
 var speed = new SpeedTest({
@@ -103,16 +103,18 @@ speed.module('download').abort();
 
 To compile the project, install the latest version of [Node](http://nodejs.org/) and run these commands inside a terminal:
 
-```
+```shell
 git clone https://github.com/Nesk/SpeedTest.git
 cd SpeedTest
 npm install
 npm run build
 ```
 
-There's also a `watch` task which compiles the project whenever a file is changed:
+There's also a `watch` script which compiles the project whenever a file is changed:
 
-    gulp watch
+```shell
+    npm run watch
+```
 
 ## Contribution
 
