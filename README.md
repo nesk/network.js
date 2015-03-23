@@ -31,7 +31,7 @@ Please note that browsers using the Resource Timing polyfill could return __inac
 // N.B. The following options are the default ones.
 var speed = new SpeedTest({
     endpoint: './speedtest.php', // Where is located your `speedtest.php` file.
-    delay: 8, // The delay while you want to take measures for a bandwidth measure.
+    delay: 8000, // The delay while you want to take measures for a bandwidth measure.
 
     // Defines the amount of data to initially use for each bandwidth module.
     dataSize: {
