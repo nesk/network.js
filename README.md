@@ -8,12 +8,19 @@ SpeedTest is based on two browser features: [Resource Timing](http://caniuse.com
 
 Thus, SpeedTest should be compatible with:
 
-* Internet Explorer 10+
-* Firefox 12+ [(Surprised? Read this…)](https://github.com/Fyrd/caniuse/blob/master/features-json/xhr2.json#L22)
-* Chrome 29+ [(Surprised? Read this…)](https://github.com/Fyrd/caniuse/blob/master/features-json/xhr2.json#L22)
-* Safari 5+ (5.1+ for the mobile version)
-* Opera 12+
-* Android Webkit 3+
+| Browser              | Partial support (polyfill) | Native support |
+| -------------------- | :-------------------:      | :------------: |
+| IE 10+               |                            | ✔              |
+| Firefox 35+          |                            | ✔              |
+| [Chrome 29+][1]      |                            | ✔              |
+| Opera 15+            |                            | ✔              |
+| Android Browser 4.4+ |                            | ✔              |
+|                      |                            |                |
+| Safari 5+            | ✔                          |                |
+| iOS Safari 5.1+      | ✔                          |                |
+| [Firefox 12+][1]     | ✔                          |                |
+| Opera 12.1+          | ✔                          |                |
+| Android Browser 3+   | ✔                          |                |
 
 __However!!__ Until SpeedTest is released in its final version, I recommend you to use the latest version of Chrome, which implements all the required features.
 
@@ -21,7 +28,7 @@ Please note that browsers using the Resource Timing polyfill could return __inac
 
 ## Caveats
 
-* Latency measures can be very far from reality if the browser doesn't support the [Resource Timing API](http://caniuse.com/#feat=resource-timing).
+* Latency measures can be __very far__ from reality if the browser doesn't have native support and uses the provided polyfill.
 * Currently, the client and the server must be on the same domain or measures can't be done due to the [same-origin policy](http://en.wikipedia.org/wiki/Same-origin_policy).
 
 ## How to use
@@ -113,7 +120,7 @@ npm run build
 There's also a `watch` script which compiles the project whenever a file is changed:
 
 ```shell
-    npm run watch
+npm run watch
 ```
 
 ## Contribution
@@ -155,3 +162,5 @@ Finally, the `SpeedTest` class initiates all the modules and makes them accessib
 ## License
 
 This project is licensed under [the MIT license](LICENSE), check [TLDRLegal for details](https://tldrlegal.com/license/mit-license).
+
+[1]: https://github.com/Fyrd/caniuse/blob/master/features-json/xhr2.json#L22
