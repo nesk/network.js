@@ -33,22 +33,20 @@ export default class HttpModule extends EventDispatcher {
 
     _initHttpConfig()
     {
-        var _this = this;
-
         // Each time a request starts or ends, set the requesting value unless it has been overridden with the
         // _setRequesting() method.
-        var loadstart = function() {
-            if (!_this._requestingOverridden) {
-                _this._requesting = true;
+        var loadstart = () => {
+            if (!this._requestingOverridden) {
+                this._requesting = true;
             }
         };
 
         this.on('xhr-loadstart', loadstart);
         this.on('xhr-upload-loadstart', loadstart);
 
-        var loadend = function() {
-            if (!_this._requestingOverridden) {
-                _this._requesting = false;
+        var loadend = () => {
+            if (!this._requestingOverridden) {
+                this._requesting = false;
             }
         };
 
@@ -66,8 +64,7 @@ export default class HttpModule extends EventDispatcher {
             return this;
         }
 
-        var _this = this,
-            options = this._options,
+        var options = this._options,
             xhr = new XMLHttpRequest(),
             validHttpMethods = ['GET', 'POST'];
 
@@ -87,7 +84,7 @@ export default class HttpModule extends EventDispatcher {
         var url = options.endpoint;
             url += (~url.indexOf('?') ? '&' : '?') + 'module=' + this._moduleName;
 
-        Object.keys(queryParams).forEach(function(param) {
+        Object.keys(queryParams).forEach(param => {
             url += '&' + param + '=' + encodeURIComponent(queryParams[param]);
         });
 
@@ -109,20 +106,20 @@ export default class HttpModule extends EventDispatcher {
         // Bind all the XHR events.
         var eventTypes = ['loadstart', 'progress', 'abort', 'error', 'load', 'timeout', 'loadend', 'readystatechange'];
 
-        eventTypes.forEach(function(eventType) {
-            xhr.addEventListener(eventType, function() {
+        eventTypes.forEach(eventType => {
+            xhr.addEventListener(eventType, () => {
                 // A last progress event can be triggered once a request has timed out, ignore it.
-                if (eventType == 'progress' && !_this._requesting) {
+                if (eventType == 'progress' && !this._requesting) {
                     return;
                 }
 
-                _this.trigger('xhr-'+ eventType, xhr, ...arguments);
+                this.trigger('xhr-'+ eventType, xhr, ...arguments);
             });
 
             // The XMLHttpRequestUpload interface supports all the above event types except the "readystatechange" one
             if (eventType != 'readystatechange') {
-                xhr.upload.addEventListener(eventType, function() {
-                    _this.trigger('xhr-upload-'+ eventType, xhr, ...arguments);
+                xhr.upload.addEventListener(eventType, () => {
+                    this.trigger('xhr-upload-'+ eventType, xhr, ...arguments);
                 });
             }
         });
@@ -154,17 +151,17 @@ export default class HttpModule extends EventDispatcher {
     {
         // The Resource Timing entries aren't immediately available once the 'load' event is triggered by an
         // XMLHttpRequest, we must wait for another process tick to check for a refreshed list.
-        setTimeout((function(lastURLToken) {
-            return function() {
+        setTimeout(() => {
+            return () => {
                 // Filter the timing entries to return only the one concerned by the last request made
-                var entries = performance.getEntriesByType('resource').filter(function(entry) {
-                    return ~entry.name.indexOf(lastURLToken);
+                var entries = performance.getEntriesByType('resource').filter(entry => {
+                    return ~entry.name.indexOf(this._lastURLToken);
                 });
 
                 // Return the entry through the callback
                 typeof callback == 'function' && callback(entries.length ? entries[0] : null);
             };
-        })(this._lastURLToken), 0);
+        }, 0);
 
         return this;
     }

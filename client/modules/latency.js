@@ -49,19 +49,17 @@ export default class LatencyModule extends HttpModule {
 
     _initLatencyConfig()
     {
-        var _this = this;
-
         // Calculate the latency with the Resource Timing API once the request is finished.
         if (Timing.supportsResourceTiming()) {
-            this.on('xhr-load', function() {
-                _this._getTimingEntry(function(entry) {
+            this.on('xhr-load', () => {
+                this._getTimingEntry(entry => {
                     // The latency calculation differs between an HTTP and an HTTPS connection.
                     // See: http://www.w3.org/TR/resource-timing/#processing-model
                     var latency = !entry.secureConnectionStart
                                     ? entry.connectEnd - entry.connectStart
                                     : entry.secureConnectionStart - entry.connectStart;
 
-                    _this._latencies.push(latency);
+                    this._latencies.push(latency);
                 });
             });
         }
@@ -71,24 +69,20 @@ export default class LatencyModule extends HttpModule {
             var labels = this._timingLabels;
 
             // Set a mark when the request starts.
-            this.on('xhr-loadstart', function() {
-                Timing.mark(labels.start);
-            });
+            this.on('xhr-loadstart', () => Timing.mark(labels.start));
 
-            this.on('xhr-readystatechange', function(xhr) {
+            this.on('xhr-readystatechange', xhr => {
                 // Ignore the first request (see the comments in the start() method) and calculate the latency if the
                 // headers have been received.
-                if (_this._requestsLeft < 5 && xhr.readyState == XMLHttpRequest.HEADERS_RECEIVED) {
+                if (this._requestsLeft < 5 && xhr.readyState == XMLHttpRequest.HEADERS_RECEIVED) {
                     // Save the timing measure.
                     Timing.mark(labels.end);
-                    _this._latencies.push(Timing.measure(labels.measure, labels.start, labels.end));
+                    this._latencies.push(Timing.measure(labels.measure, labels.start, labels.end));
                 }
             });
         }
 
-        this.on('xhr-load', function() {
-            _this._nextRequest();
-        });
+        this.on('xhr-load', () => this._nextRequest());
     }
 
     _nextRequest()
@@ -105,17 +99,13 @@ export default class LatencyModule extends HttpModule {
             // Create the new request and send it.
             this._newRequest('GET')._sendRequest();
         } else {
-            var _this = this;
-
             // All the requests are finished, set the requesting status to false.
             this._setRequesting(false);
 
             // If all the requests have been executed, calculate the average latency. Since the _getTimingEntry() method
             // is asynchronous, wait for the next process tick to execute the _calculate() method, to be sure that all
             // the latencies have been retrieved.
-            setTimeout(function() {
-                _this._calculate();
-            }, 0);
+            setTimeout(() => this._calculate(), 0);
         }
     }
 
@@ -125,7 +115,7 @@ export default class LatencyModule extends HttpModule {
             isThereAnyZeroLatency = false;
 
         // Get the average latency.
-        var avgLatency = latencies.reduce(function(a, b) {
+        var avgLatency = latencies.reduce((a, b) => {
             // Check if there is any latency equal to zero.
             isThereAnyZeroLatency = isThereAnyZeroLatency || (a == 0 || b == 0);
             // Sum the current latency to the previous value.

@@ -89,25 +89,13 @@ export default class Bandwidth extends HttpModule {
 
     _initBandwidthConfig()
     {
-        var _this = this,
-            loadingType = this._loadingType,
+        var loadingType = this._loadingType,
             eventsPrefix = (loadingType == 'upload') ? 'xhr-upload-' : 'xhr-';
 
-        this.on(eventsPrefix +'loadstart', function() {
-            Timing.mark(_this._timingLabels.start);
-        });
-
-        this.on(eventsPrefix +'progress', function(event) {
-            _this._progress(event);
-        });
-
-        this.on(eventsPrefix +'timeout', function() {
-            _this._timeout();
-        });
-
-        this.on(eventsPrefix +'loadend', function() {
-            _this._end();
-        });
+        this.on(eventsPrefix +'loadstart', () => Timing.mark(this._timingLabels.start));
+        this.on(eventsPrefix +'progress', event => this._progress(event));
+        this.on(eventsPrefix +'timeout', () => this._timeout());
+        this.on(eventsPrefix +'loadend', () => this._end());
     }
 
     _progress(event)

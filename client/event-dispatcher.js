@@ -50,7 +50,7 @@ export default class EventDispatcher {
         // cancelling an action.
         var returnValue = true;
 
-        events.forEach(function(callback) {
+        events.forEach(callback => {
             // A callback must explicitly return false if it wants the trigger() method to return false, undefined will
             // not work. This avoids crappy callbacks to mess up with the triggering system.
             var value = callback(...extraParameters);
