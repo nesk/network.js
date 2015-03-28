@@ -22,13 +22,12 @@ Thus, SpeedTest should be compatible with:
 | Opera 12.1+          | ✔                          |                |
 | Android Browser 3+   | ✔                          |                |
 
-__However!!__ Until SpeedTest is released in its final version, I recommend you to use the latest version of Chrome, which implements all the required features.
-
-Please note that browsers using the Resource Timing polyfill could return __inaccurate measures__, especially __for latency calculations__.
+Latency measures can be __very far__ from reality if the browser doesn't have native support and uses the provided polyfill.
 
 ## Caveats
 
-* Latency measures can be __very far__ from reality if the browser doesn't have native support and uses the provided polyfill.
+* Latency measures always return __0__ in Firefox.
+* Chrome cannot upload a __~128 MB__ file, which will mainly affect fiber users.
 * Currently, the client and the server must be on the same domain or measures can't be done due to the [same-origin policy](http://en.wikipedia.org/wiki/Same-origin_policy).
 
 ## How to use
