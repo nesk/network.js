@@ -116,13 +116,13 @@ export default class HttpModule extends EventDispatcher {
                     return;
                 }
 
-                _this.trigger('xhr-'+ eventType, arguments, xhr);
+                _this.trigger('xhr-'+ eventType, xhr, ...arguments);
             });
 
             // The XMLHttpRequestUpload interface supports all the above event types except the "readystatechange" one
             if (eventType != 'readystatechange') {
                 xhr.upload.addEventListener(eventType, function() {
-                    _this.trigger('xhr-upload-'+ eventType, arguments, xhr);
+                    _this.trigger('xhr-upload-'+ eventType, xhr, ...arguments);
                 });
             }
         });

@@ -57,7 +57,7 @@ export default class Bandwidth extends HttpModule {
 
         // Trigger the start event
         if (!this._isRestarting) {
-            this.trigger('start', [(loadingType == 'upload') ? dataSize.upload : dataSize.download]);
+            this.trigger('start', (loadingType == 'upload') ? dataSize.upload : dataSize.download);
         }
 
         // Create unique timing labels for the new request
@@ -149,7 +149,7 @@ export default class Bandwidth extends HttpModule {
         this._avgSpeed = avgSpeed;
         this._speedRecords.push(instantSpeed);
 
-        this.trigger('progress', [avgSpeed, instantSpeed]);
+        this.trigger('progress', avgSpeed, instantSpeed);
     }
 
     _timeout()
@@ -162,7 +162,7 @@ export default class Bandwidth extends HttpModule {
         // A timeout or an abort occured, bypass the further requests and trigger the "end" event.
         if (this._intendedEnd) {
             this._isRestarting = false;
-            this.trigger('end', [this._avgSpeed, this._speedRecords]);
+            this.trigger('end', this._avgSpeed, this._speedRecords);
         }
 
         // The request ended to early, restart it with an increased data size.
@@ -173,7 +173,7 @@ export default class Bandwidth extends HttpModule {
             dataSize.upload *= dataSize.multiplier;
             dataSize.download *= dataSize.multiplier;
 
-            this.trigger('restart', [(loadingType == 'upload') ? dataSize.upload : dataSize.download]);
+            this.trigger('restart', (loadingType == 'upload') ? dataSize.upload : dataSize.download);
 
             this._isRestarting = true;
             this.start();

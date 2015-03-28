@@ -75,10 +75,10 @@ export default class LatencyModule extends HttpModule {
                 Timing.mark(labels.start);
             });
 
-            this.on('xhr-readystatechange', function() {
+            this.on('xhr-readystatechange', function(xhr) {
                 // Ignore the first request (see the comments in the start() method) and calculate the latency if the
                 // headers have been received.
-                if (_this._requestsLeft < 5 && this.readyState == XMLHttpRequest.HEADERS_RECEIVED) {
+                if (_this._requestsLeft < 5 && xhr.readyState == XMLHttpRequest.HEADERS_RECEIVED) {
                     // Save the timing measure.
                     Timing.mark(labels.end);
                     _this._latencies.push(Timing.measure(labels.measure, labels.start, labels.end));
@@ -87,7 +87,6 @@ export default class LatencyModule extends HttpModule {
         }
 
         this.on('xhr-load', function() {
-            // An anonymous callback is required to avoid the `this` key to be defined as the XHR object.
             _this._nextRequest();
         });
     }
@@ -140,7 +139,7 @@ export default class LatencyModule extends HttpModule {
         ].join(' '));
 
         // Trigger the "end" event with the average latency and the latency list as parameters.
-        this.trigger('end', [avgLatency, latencies]);
+        this.trigger('end', avgLatency, latencies);
     }
 
 }
