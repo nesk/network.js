@@ -1,4 +1,4 @@
-require('babel/polyfill');
+require('core-js/src/es6.object.statics');
 
 var LatencyModule = require('./modules/latency'),
     BandwidthModule = require('./modules/bandwidth');
