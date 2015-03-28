@@ -4,7 +4,8 @@
 
 var path = require('path');
 
-var browserify = require('browserify'),
+var babelify = require('babelify'),
+    browserify = require('browserify'),
     buffer = require('vinyl-buffer'),
     chalk = require('chalk'),
     exorcist = require('exorcist'),
@@ -31,6 +32,15 @@ var names = {
 };
 
 /*
+ * Helpers
+ */
+
+function error(error) {
+    console.log('\n' + chalk.red('Error: ') + error.message + '\n');
+    this.emit('end');
+}
+
+/*
  * Tasks
  */
 
@@ -40,13 +50,14 @@ gulp.task('default', function() {
         standalone: 'SpeedTest',
         debug: true
     })
-        .bundle()
+        .transform(babelify)
+        .bundle().on('error', error)
         .pipe(exorcist(path.join(paths.dest, names.base + '.map')))
         .pipe(source(names.base))
         .pipe(gulp.dest(paths.dest))
         .pipe(buffer())
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(uglify())
+        .pipe(uglify().on('error', error))
         .pipe(rename(names.min))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.dest));

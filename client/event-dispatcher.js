@@ -1,62 +1,66 @@
-'use strict';
+export default class EventDispatcher {
 
-var EventDispatcher = module.exports = function() {
-    this._events = {}; // Contains all the event callbacks, organized by event types.
-};
-
-var fn = EventDispatcher.prototype;
-
-fn.on = function(eventType, callback) {
-    var events = this._events[eventType];
-
-    // If inexistant, create the array used to store the callbacks.
-    if (!events) {
-        events = this._events[eventType] = [];
+    constructor()
+    {
+        this._events = {}; // Contains all the event callbacks, organized by event types.
     }
 
-    // If the callback isn't already registered, store it.
-    if (!~events.indexOf(callback)) {
-        events.push(callback);
-    }
+    on(eventType, callback)
+    {
+        var events = this._events[eventType];
 
-    return this;
-};
-
-fn.off = function(eventType, callback) {
-    var events = this._events[eventType];
-
-    // If there is no specified callback, simply delete all the callbacks binded to the provided event type.
-    if (typeof callback == 'undefined' && events) {
-        delete this._events[eventType];
-    } else {
-        var eventIndex = events ? events.indexOf(callback) : -1;
-
-        // If the callback is registered, remove it from the array.
-        if (~eventIndex) {
-            events.splice(eventIndex, 1);
+        // If inexistant, create the array used to store the callbacks.
+        if (!events) {
+            events = this._events[eventType] = [];
         }
+
+        // If the callback isn't already registered, store it.
+        if (!~events.indexOf(callback)) {
+            events.push(callback);
+        }
+
+        return this;
     }
 
-    return this;
-};
+    off(eventType, callback)
+    {
+        var events = this._events[eventType];
 
-fn.trigger = function(eventType, extraParameters, context) {
-    var events = this._events[eventType] || [];
-    extraParameters = extraParameters || [];
+        // If there is no specified callback, simply delete all the callbacks binded to the provided event type.
+        if (typeof callback == 'undefined' && events) {
+            delete this._events[eventType];
+        } else {
+            var eventIndex = events ? events.indexOf(callback) : -1;
 
-    // A callback can return a boolean value which will be logically compared to the other callbacks values before
-    // being returned by the trigger() method. This allows a callback to send a "signal" to the caller, like
-    // cancelling an action.
-    var returnValue = true;
+            // If the callback is registered, remove it from the array.
+            if (~eventIndex) {
+                events.splice(eventIndex, 1);
+            }
+        }
 
-    events.forEach(function(callback) {
-        // A callback must explicitly return false if it wants the trigger() method to return false, undefined will
-        // not work. This avoids crappy callbacks to mess up with the triggering system.
-        var value = callback.apply(this, extraParameters);
-            value = value !== false ? true : false;
+        return this;
+    }
 
-        returnValue = returnValue && value; // Compare the result of the callback to the actual return value.
-    }, context);
+    trigger(eventType, extraParameters, context)
+    {
+        var events = this._events[eventType] || [];
+        extraParameters = extraParameters || [];
 
-    return returnValue;
-};
+        // A callback can return a boolean value which will be logically compared to the other callbacks values before
+        // being returned by the trigger() method. This allows a callback to send a "signal" to the caller, like
+        // cancelling an action.
+        var returnValue = true;
+
+        events.forEach(function(callback) {
+            // A callback must explicitly return false if it wants the trigger() method to return false, undefined will
+            // not work. This avoids crappy callbacks to mess up with the triggering system.
+            var value = callback.apply(this, extraParameters);
+                value = value !== false ? true : false;
+
+            returnValue = returnValue && value; // Compare the result of the callback to the actual return value
+        }, context);
+
+        return returnValue;
+    }
+
+}

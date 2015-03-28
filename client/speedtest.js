@@ -1,43 +1,45 @@
-'use strict';
+require('babel/polyfill');
 
 var LatencyModule = require('./modules/latency'),
     BandwidthModule = require('./modules/bandwidth');
 
-var SpeedTest = module.exports = function(options) {
-    // Initialize the modules
-    this._modules = {};
-    this._setModule('latency', new LatencyModule(options))
-        ._setModule('upload', new BandwidthModule('upload', options))
-        ._setModule('download', new BandwidthModule('download', options));
-};
+export default class SpeedTest {
 
-var fn = SpeedTest.prototype;
+    constructor(options = {})
+    {
+        // Initialize the modules
+        this._modules = {};
+        this._setModule('latency', new LatencyModule(options))
+            ._setModule('upload', new BandwidthModule('upload', options))
+            ._setModule('download', new BandwidthModule('download', options));
+    }
 
-fn.module = function(name) {
-    return this._modules[name] || null;
-};
+    module(name)
+    {
+        return this._modules[name] || null;
+    }
 
-fn.isRequesting = function() {
-    var modules = this._modules,
-        requesting = false;
+    isRequesting()
+    {
+        var modules = this._modules,
+            requesting = false;
 
-    for (var i in modules) {
-        if (modules.hasOwnProperty(i)) {
-            requesting = requesting || modules[i].isRequesting();
+        for (var i in modules) {
+            if (modules.hasOwnProperty(i)) {
+                requesting = requesting || modules[i].isRequesting();
+            }
         }
+
+        return requesting;
     }
 
-    return requesting;
-};
+    _setModule(name, object)
+    {
+        if (object) {
+            this._modules[name] = object.on('_newRequest', () => !this.isRequesting());
+        }
 
-fn._setModule = function(name, object) {
-    var _this = this;
-
-    if (object) {
-        this._modules[name] = object.on('_newRequest', function() {
-            return !_this.isRequesting();
-        });
+        return this;
     }
 
-    return this;
-};
+}

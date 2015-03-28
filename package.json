@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/nesk/speedtest",
   "devDependencies": {
+    "babel": "~4.7.16",
+    "babelify": "~5.0.4",
     "browserify": "^9.0.3",
     "chalk": "^1.0.0",
     "exorcist": "^0.1.6",
