@@ -35,23 +35,17 @@ export default class HttpModule extends EventDispatcher {
     {
         // Each time a request starts or ends, set the requesting value unless it has been overridden with the
         // _setRequesting() method.
-        var loadstart = () => {
+        this.on(['xhr-loadstart', 'xhr-upload-loadstart'], () => {
             if (!this._requestingOverridden) {
                 this._requesting = true;
             }
-        };
+        });
 
-        this.on('xhr-loadstart', loadstart);
-        this.on('xhr-upload-loadstart', loadstart);
-
-        var loadend = () => {
+        this.on(['xhr-loadend', 'xhr-upload-loadend'], () => {
             if (!this._requestingOverridden) {
                 this._requesting = false;
             }
-        };
-
-        this.on('xhr-loadend', loadend);
-        this.on('xhr-upload-loadend', loadend);
+        });
     }
 
     _newRequest(httpMethod, queryParams)

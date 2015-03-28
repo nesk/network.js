@@ -5,38 +5,41 @@ export default class EventDispatcher {
         this._events = {}; // Contains all the event callbacks, organized by event types.
     }
 
-    on(eventType, callback)
+    on(eventTypes, callback)
     {
-        var events = this._events[eventType];
+        eventTypes = Array.isArray(eventTypes) ? eventTypes : [eventTypes];
 
-        // If inexistant, create the array used to store the callbacks.
-        if (!events) {
-            events = this._events[eventType] = [];
-        }
+        eventTypes.forEach(eventType => {
+            var events = this._events[eventType] = this._events[eventType] || [];
 
-        // If the callback isn't already registered, store it.
-        if (!~events.indexOf(callback)) {
-            events.push(callback);
-        }
+            // If the callback isn't already registered, store it.
+            if (!~events.indexOf(callback)) {
+                events.push(callback);
+            }
+        });
 
         return this;
     }
 
-    off(eventType, callback)
+    off(eventTypes, callback)
     {
-        var events = this._events[eventType];
+        eventTypes = Array.isArray(eventTypes) ? eventTypes : [eventTypes];
 
-        // If there is no specified callback, simply delete all the callbacks binded to the provided event type.
-        if (callback == undefined && events) {
-            delete this._events[eventType];
-        } else {
-            var eventIndex = events ? events.indexOf(callback) : -1;
+        eventTypes.forEach(eventType => {
+            var events = this._events[eventType];
 
-            // If the callback is registered, remove it from the array.
-            if (~eventIndex) {
-                events.splice(eventIndex, 1);
+            // If there is no specified callback, simply delete all the callbacks binded to the provided event type.
+            if (callback == undefined && events) {
+                delete this._events[eventType];
+            } else {
+                var eventIndex = events ? events.indexOf(callback) : -1;
+
+                // If the callback is registered, remove it from the array.
+                if (~eventIndex) {
+                    events.splice(eventIndex, 1);
+                }
             }
-        }
+        });
 
         return this;
     }
