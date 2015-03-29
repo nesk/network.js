@@ -4,10 +4,8 @@ export default class HttpModule extends EventDispatcher {
 
     constructor(moduleName, options = {})
     {
-        // Call parent constructor
         super.constructor();
 
-        // Define default options and override them by the ones provided at instanciation
         options = Object.assign({
             endpoint: './speedtest.php',
             delay: 8000
@@ -22,17 +20,6 @@ export default class HttpModule extends EventDispatcher {
         this._requestingOverridden = false;
         this._requesting = false;
 
-        // Initiate the object
-        this._initHttpConfig();
-    }
-
-    isRequesting()
-    {
-        return this._requesting;
-    }
-
-    _initHttpConfig()
-    {
         // Each time a request starts or ends, set the requesting value unless it has been overridden with the
         // _setRequesting() method.
         this.on(['xhr-loadstart', 'xhr-upload-loadstart'], () => {
@@ -46,6 +33,11 @@ export default class HttpModule extends EventDispatcher {
                 this._requesting = false;
             }
         });
+    }
+
+    isRequesting()
+    {
+        return this._requesting;
     }
 
     _newRequest(httpMethod, queryParams)

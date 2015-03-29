@@ -2,7 +2,8 @@ export default class EventDispatcher {
 
     constructor()
     {
-        this._events = {}; // Contains all the event callbacks, organized by event types.
+        // Contains all the event callbacks, organized by event types.
+        this._events = {};
     }
 
     on(eventTypes, callback)

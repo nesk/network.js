@@ -11,10 +11,9 @@ export default class LatencyModule extends HttpModule {
             delay: 0
         });
 
-        // Call parent constructor.
         super.constructor('latency', options);
 
-        // Define the object properties.
+        // Define the object properties
         this._requestsLeft = 0;
         this._latencies = [];
         this._requestID = 0;
@@ -26,34 +25,11 @@ export default class LatencyModule extends HttpModule {
             measure: null
         };
 
-        // Initiate the object.
-        this._initLatencyConfig();
-    }
-
-    start()
-    {
-        // Set the number of requests required to establish the network latency. If the browser doesn't support the
-        // Resource Timing API, add a request that will be ignored to avoid a longer request due to a possible
-        // DNS/whatever fetch.
-        this._requestsLeft = 5;
-        Timing.supportsResourceTiming() || this._requestsLeft++;
-
-        // Override the requesting value since a complete latency request consists off multiple ones.
-        this._setRequesting(true);
-
-        this._latencies = [];
-        this._nextRequest();
-
-        return this;
-    }
-
-    _initLatencyConfig()
-    {
-        // Calculate the latency with the Resource Timing API once the request is finished.
+        // Calculate the latency with the Resource Timing API once the request is finished
         if (Timing.supportsResourceTiming()) {
             this.on('xhr-load', () => {
                 this._getTimingEntry(entry => {
-                    // The latency calculation differs between an HTTP and an HTTPS connection.
+                    // The latency calculation differs between an HTTP and an HTTPS connection
                     // See: http://www.w3.org/TR/resource-timing/#processing-model
                     var latency = !entry.secureConnectionStart
                                     ? entry.connectEnd - entry.connectStart
@@ -64,7 +40,7 @@ export default class LatencyModule extends HttpModule {
             });
         }
 
-        // If the browser doesn't support the Resource Timing API, we fallback on a Datetime solution.
+        // The browser doesn't support the Resource Timing API, we fallback on a Datetime solution.
         else {
             var labels = this._timingLabels;
 
@@ -83,6 +59,23 @@ export default class LatencyModule extends HttpModule {
         }
 
         this.on('xhr-load', () => this._nextRequest());
+    }
+
+    start()
+    {
+        // Set the number of requests required to establish the network latency. If the browser doesn't support the
+        // Resource Timing API, add a request that will be ignored to avoid a longer request due to a possible
+        // DNS/whatever fetch.
+        this._requestsLeft = 5;
+        if (!Timing.supportsResourceTiming()) this._requestsLeft++;
+
+        // Override the requesting value since a complete latency request consists off multiple ones.
+        this._setRequesting(true);
+
+        this._latencies = [];
+        this._nextRequest();
+
+        return this;
     }
 
     _nextRequest()

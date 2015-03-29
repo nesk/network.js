@@ -5,10 +5,9 @@ export default class Bandwidth extends HttpModule {
 
     constructor(loadingType, options = {})
     {
-        var validLoadingTypes = ['upload', 'download'];
-        loadingType = (~validLoadingTypes.indexOf(loadingType)) ? loadingType : 'download';
+        // Instanciate the parent
+        loadingType = (~['upload', 'download'].indexOf(loadingType)) ? loadingType : 'download';
 
-        // Define default options and override them by the ones provided at instanciation
         options = Object.assign({
             dataSize: {
                 upload: 2 * 1024 * 1024, // 2 MB
@@ -17,7 +16,6 @@ export default class Bandwidth extends HttpModule {
             }
         }, options);
 
-        // Call parent constructor
         super.constructor(loadingType, options);
 
         // Define the object properties
@@ -41,8 +39,13 @@ export default class Bandwidth extends HttpModule {
             measure: null
         };
 
-        // Initiate the object
-        this._initBandwidthConfig();
+        // Bind to XHR events
+        var eventsPrefix = (loadingType == 'upload') ? 'xhr-upload-' : 'xhr-';
+
+        this.on(eventsPrefix + 'loadstart', () => Timing.mark(this._timingLabels.start));
+        this.on(eventsPrefix + 'progress', (xhr, event) => this._progress(event));
+        this.on(eventsPrefix + 'timeout', () => this._timeout());
+        this.on(eventsPrefix + 'loadend', () => this._end());
     }
 
     start()
@@ -85,17 +88,6 @@ export default class Bandwidth extends HttpModule {
     {
         this._intendedEnd = true;
         return this._abort();
-    }
-
-    _initBandwidthConfig()
-    {
-        var loadingType = this._loadingType,
-            eventsPrefix = (loadingType == 'upload') ? 'xhr-upload-' : 'xhr-';
-
-        this.on(eventsPrefix +'loadstart', () => Timing.mark(this._timingLabels.start));
-        this.on(eventsPrefix +'progress', (xhr, event) => this._progress(event));
-        this.on(eventsPrefix +'timeout', () => this._timeout());
-        this.on(eventsPrefix +'loadend', () => this._end());
     }
 
     _progress(event)
