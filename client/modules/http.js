@@ -98,22 +98,23 @@ export default class HttpModule extends EventDispatcher {
         this._xhr = xhr;
 
         // Bind all the XHR events.
-        var eventTypes = ['loadstart', 'progress', 'abort', 'error', 'load', 'timeout', 'loadend', 'readystatechange'];
+        var self = this,
+            eventTypes = ['loadstart', 'progress', 'abort', 'error', 'load', 'timeout', 'loadend', 'readystatechange'];
 
         eventTypes.forEach(eventType => {
-            xhr.addEventListener(eventType, () => {
+            xhr.addEventListener(eventType, function() {
                 // A last progress event can be triggered once a request has timed out, ignore it.
-                if (eventType == 'progress' && !this._requesting) {
+                if (eventType == 'progress' && !self._requesting) {
                     return;
                 }
 
-                this.trigger('xhr-'+ eventType, xhr, ...arguments);
+                self.trigger('xhr-'+ eventType, xhr, ...arguments);
             });
 
             // The XMLHttpRequestUpload interface supports all the above event types except the "readystatechange" one
             if (eventType != 'readystatechange') {
-                xhr.upload.addEventListener(eventType, () => {
-                    this.trigger('xhr-upload-'+ eventType, xhr, ...arguments);
+                xhr.upload.addEventListener(eventType, function() {
+                    self.trigger('xhr-upload-'+ eventType, xhr, ...arguments);
                 });
             }
         });
