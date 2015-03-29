@@ -145,17 +145,17 @@ export default class HttpModule extends EventDispatcher {
     {
         // The Resource Timing entries aren't immediately available once the 'load' event is triggered by an
         // XMLHttpRequest, we must wait for another process tick to check for a refreshed list.
-        setTimeout(() => {
+        setTimeout((lastURLToken => {
             return () => {
                 // Filter the timing entries to return only the one concerned by the last request made
-                var entries = performance.getEntriesByType('resource').filter(entry => {
-                    return ~entry.name.indexOf(this._lastURLToken);
+                var entries = performance.getEntriesByType('resource').filter(function(entry) {
+                    return ~entry.name.indexOf(lastURLToken);
                 });
 
                 // Return the entry through the callback
                 typeof callback == 'function' && callback(entries.length ? entries[0] : null);
             };
-        }, 0);
+        })(this._lastURLToken), 0);
 
         return this;
     }
