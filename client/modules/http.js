@@ -89,7 +89,7 @@ export default class HttpModule extends EventDispatcher {
         // Replace the old request by the new one
         this._xhr = xhr;
 
-        // Bind all the XHR events.
+        // Bind all the XHR events
         var self = this,
             eventTypes = ['loadstart', 'progress', 'abort', 'error', 'load', 'timeout', 'loadend', 'readystatechange'];
 

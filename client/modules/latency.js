@@ -44,14 +44,14 @@ export default class LatencyModule extends HttpModule {
         else {
             var labels = this._timingLabels;
 
-            // Set a mark when the request starts.
+            // Set a mark when the request starts
             this.on('xhr-loadstart', () => Timing.mark(labels.start));
 
             this.on('xhr-readystatechange', xhr => {
                 // Ignore the first request (see the comments in the start() method) and calculate the latency if the
                 // headers have been received.
                 if (this._requestsLeft < 5 && xhr.readyState == XMLHttpRequest.HEADERS_RECEIVED) {
-                    // Save the timing measure.
+                    // Save the timing measure
                     Timing.mark(labels.end);
                     this._latencies.push(Timing.measure(labels.measure, labels.start, labels.end));
                 }
@@ -69,7 +69,7 @@ export default class LatencyModule extends HttpModule {
         this._requestsLeft = 5;
         if (!Timing.supportsResourceTiming()) this._requestsLeft++;
 
-        // Override the requesting value since a complete latency request consists off multiple ones.
+        // Override the requesting value since a complete latency request consists off multiple ones
         this._setRequesting(true);
 
         this._latencies = [];
@@ -83,13 +83,13 @@ export default class LatencyModule extends HttpModule {
         if (this._requestsLeft--) {
             var reqID = this._requestID++;
 
-            // Create unique timing labels for the new request.
+            // Create unique timing labels for the new request
             var labels = this._timingLabels;
             labels.start = 'latency-'+ reqID + '-start';
             labels.end = 'latency-'+ reqID + '-end';
             labels.measure = 'latency-'+ reqID + '-measure';
 
-            // Create the new request and send it.
+            // Create the new request and send it
             this._newRequest('GET')._sendRequest();
         } else {
             // All the requests are finished, set the requesting status to false.
@@ -107,11 +107,11 @@ export default class LatencyModule extends HttpModule {
         var latencies = this._latencies,
             isThereAnyZeroLatency = false;
 
-        // Get the average latency.
+        // Get the average latency
         var avgLatency = latencies.reduce((a, b) => {
-            // Check if there is any latency equal to zero.
+            // Check if there is any latency equal to zero
             isThereAnyZeroLatency = isThereAnyZeroLatency || (a == 0 || b == 0);
-            // Sum the current latency to the previous value.
+            // Sum the current latency to the previous value
             return a + b;
         }) / latencies.length;
 
@@ -121,7 +121,7 @@ export default class LatencyModule extends HttpModule {
             'is probably using persistant connections. Check the documentation to solve this problem.'
         ].join(' '));
 
-        // Trigger the "end" event with the average latency and the latency list as parameters.
+        // Trigger the "end" event with the average latency and the latency list as parameters
         this.trigger('end', avgLatency, latencies);
     }
 

@@ -1,5 +1,6 @@
 var HttpModule = require('./http'),
-    Timing = require('../timing');
+    Timing = require('../timing'),
+    Utils = require('../utils');
 
 export default class Bandwidth extends HttpModule {
 
@@ -31,6 +32,10 @@ export default class Bandwidth extends HttpModule {
         this._requestID = 0;
         this._progressID = 0;
 
+        this._started = false;
+        this._firstProgress = true;
+        this._deferredProgress;
+
         // Unique labels for each request, exclusively used to make measures.
         this._timingLabels = {
             start: null,
@@ -42,7 +47,14 @@ export default class Bandwidth extends HttpModule {
         // Bind to XHR events
         var eventsPrefix = (loadingType == 'upload') ? 'xhr-upload-' : 'xhr-';
 
-        this.on(eventsPrefix + 'loadstart', () => Timing.mark(this._timingLabels.start));
+        this.on('xhr-upload-loadstart', () => Timing.mark(this._timingLabels.start));
+        this.on('xhr-readystatechange', xhr => {
+            if (!this._started && xhr.readyState == XMLHttpRequest.LOADING) {
+                Timing.mark(this._timingLabels.start);
+                this._started = true;
+            }
+        });
+
         this.on(eventsPrefix + 'progress', (xhr, event) => this._progress(event));
         this.on(eventsPrefix + 'timeout', () => this._timeout());
         this.on(eventsPrefix + 'loadend', () => this._end());
@@ -57,6 +69,9 @@ export default class Bandwidth extends HttpModule {
         this._intendedEnd = false;
         this._lastLoadedValue = null;
         this._speedRecords = [];
+        this._started = false;
+        this._firstProgress = true;
+        this._deferredProgress = Utils.defer();
 
         // Trigger the start event
         if (!this._isRestarting) {
@@ -92,6 +107,12 @@ export default class Bandwidth extends HttpModule {
 
     _progress(event)
     {
+        // Ignore the first progress event, it generally contributes to get incoherent values.
+        if (this._firstProgress) return this._firstProgress = false;
+
+        // Execute the previous progress trigger
+        this._deferredProgress.run();
+
         var labels = this._timingLabels,
             progressID = this._progressID++,
             markLabel = labels.progress +'-'+ progressID,
@@ -125,11 +146,14 @@ export default class Bandwidth extends HttpModule {
         // Save the `loaded` property of the event for the next progress event
         this._lastLoadedValue = loaded;
 
-        // Save the measures
-        this._avgSpeed = avgSpeed;
-        this._speedRecords.push(instantSpeed);
+        // Defer measures saving and event triggering, this allows to cancel the last progress event, which can generate
+        // incoherent values.
+        this._deferredProgress = Utils.defer(() => {
+            this._avgSpeed = avgSpeed;
+            this._speedRecords.push(instantSpeed);
 
-        this.trigger('progress', avgSpeed, instantSpeed);
+            this.trigger('progress', avgSpeed, instantSpeed);
+        });
     }
 
     _timeout()
