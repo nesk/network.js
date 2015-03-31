@@ -1,5 +1,5 @@
-var HttpModule = require('./http'),
-    Timing = require('../timing');
+import HttpModule from './http';
+import Timing from '../timing';
 
 export default class LatencyModule extends HttpModule {
 

@@ -1,4 +1,4 @@
-var EventDispatcher = require('../event-dispatcher');
+import EventDispatcher from '../event-dispatcher';
 
 export default class HttpModule extends EventDispatcher {
 

@@ -1,6 +1,6 @@
-var HttpModule = require('./http'),
-    Timing = require('../timing'),
-    Utils = require('../utils');
+import HttpModule from './http';
+import Timing from '../timing';
+import * as Utils from '../utils';
 
 export default class Bandwidth extends HttpModule {
 

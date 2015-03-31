@@ -1,7 +1,7 @@
 require('core-js/src/es6.object.statics');
 
-var LatencyModule = require('./modules/latency'),
-    BandwidthModule = require('./modules/bandwidth');
+import LatencyModule from './modules/latency';
+import BandwidthModule from './modules/bandwidth';
 
 export default class SpeedTest {
 
