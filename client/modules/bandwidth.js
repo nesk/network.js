@@ -1,6 +1,6 @@
 import HttpModule from './http';
 import Timing from '../timing';
-import * as Utils from '../utils';
+import {assign, defer} from '../utils';
 
 export default class Bandwidth extends HttpModule {
 
@@ -9,7 +9,7 @@ export default class Bandwidth extends HttpModule {
         // Instanciate the parent
         loadingType = (~['upload', 'download'].indexOf(loadingType)) ? loadingType : 'download';
 
-        options = Object.assign({
+        options = assign({
             dataSize: {
                 upload: 2 * 1024 * 1024, // 2 MB
                 download: 10 * 1024 * 1024, // 10 MB
@@ -71,7 +71,7 @@ export default class Bandwidth extends HttpModule {
         this._speedRecords = [];
         this._started = false;
         this._firstProgress = true;
-        this._deferredProgress = Utils.defer();
+        this._deferredProgress = defer();
 
         // Trigger the start event
         if (!this._isRestarting) {
@@ -148,7 +148,7 @@ export default class Bandwidth extends HttpModule {
 
         // Defer measures saving and event triggering, this allows to cancel the last progress event, which can generate
         // incoherent values.
-        this._deferredProgress = Utils.defer(() => {
+        this._deferredProgress = defer(() => {
             this._avgSpeed = avgSpeed;
             this._speedRecords.push(instantSpeed);
 

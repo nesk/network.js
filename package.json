@@ -21,7 +21,6 @@
     "babelify": "~5.0.4",
     "browserify": "^9.0.3",
     "chalk": "^1.0.0",
-    "core-js": "^0.7.2",
     "exorcist": "^0.1.6",
     "gulp": "^3.8.11",
     "gulp-rename": "^1.2.0",

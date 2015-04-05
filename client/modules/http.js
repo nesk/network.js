@@ -1,4 +1,5 @@
 import EventDispatcher from '../event-dispatcher';
+import {assign} from '../utils';
 
 export default class HttpModule extends EventDispatcher {
 
@@ -6,7 +7,7 @@ export default class HttpModule extends EventDispatcher {
     {
         super.constructor();
 
-        options = Object.assign({
+        options = assign({
             endpoint: './speedtest.php',
             delay: 8000
         }, options);

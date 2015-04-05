@@ -1,5 +1,6 @@
 import HttpModule from './http';
 import Timing from '../timing';
+import {assign} from '../utils';
 
 export default class LatencyModule extends HttpModule {
 
@@ -7,7 +8,7 @@ export default class LatencyModule extends HttpModule {
     {
         // We dont want any timeout during a latency calculation. Here we are cloning the options because we don't want
         // to alter the original ones.
-        options = Object.assign(JSON.parse(JSON.stringify(options)), {
+        options = assign(JSON.parse(JSON.stringify(options)), {
             delay: 0
         });
 

@@ -1,5 +1,3 @@
-require('core-js/src/es6.object.statics');
-
 import LatencyModule from './modules/latency';
 import BandwidthModule from './modules/bandwidth';
 
