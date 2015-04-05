@@ -85,9 +85,9 @@ export default class LatencyModule extends HttpModule {
 
             // Create unique timing labels for the new request
             var labels = this._timingLabels;
-            labels.start = 'latency-'+ reqID + '-start';
-            labels.end = 'latency-'+ reqID + '-end';
-            labels.measure = 'latency-'+ reqID + '-measure';
+            labels.start = `latency-${reqID}-start`;
+            labels.end = `latency-${reqID}-end`;
+            labels.measure = `latency-${reqID}-measure`;
 
             // Create the new request and send it
             this._newRequest('GET')._sendRequest();

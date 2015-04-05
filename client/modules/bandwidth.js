@@ -45,8 +45,6 @@ export default class Bandwidth extends HttpModule {
         };
 
         // Bind to XHR events
-        var eventsPrefix = (loadingType == 'upload') ? 'xhr-upload-' : 'xhr-';
-
         this.on('xhr-upload-loadstart', () => Timing.mark(this._timingLabels.start));
         this.on('xhr-readystatechange', xhr => {
             if (!this._started && xhr.readyState == XMLHttpRequest.LOADING) {
@@ -55,9 +53,11 @@ export default class Bandwidth extends HttpModule {
             }
         });
 
-        this.on(eventsPrefix + 'progress', (xhr, event) => this._progress(event));
-        this.on(eventsPrefix + 'timeout', () => this._timeout());
-        this.on(eventsPrefix + 'loadend', () => this._end());
+        var eventsPrefix = (loadingType == 'upload') ? 'xhr-upload' : 'xhr';
+
+        this.on(`${eventsPrefix}-progress`, (xhr, event) => this._progress(event));
+        this.on(`${eventsPrefix}-timeout`, () => this._timeout());
+        this.on(`${eventsPrefix}-loadend`, () => this._end());
     }
 
     start()
@@ -80,10 +80,10 @@ export default class Bandwidth extends HttpModule {
 
         // Create unique timing labels for the new request
         var labels = this._timingLabels;
-        labels.start = loadingType +'-'+ reqID + '-start';
-        labels.progress = loadingType +'-'+ reqID + '-progress';
-        labels.end = loadingType +'-'+ reqID + '-end';
-        labels.measure = loadingType +'-'+ reqID + '-measure';
+        labels.start = `${loadingType}-${reqID}-start`;
+        labels.progress = `${loadingType}-${reqID}-progress`;
+        labels.end = `${loadingType}-${reqID}-end`;
+        labels.measure = `${loadingType}-${reqID}-measure`;
 
         // Generate some random data to upload to the server. Here we're using a Blob instead of an ArrayBuffer because
         // of a bug in Chrome (tested in v33.0.1750.146), causing a freeze of the page while trying to directly upload
@@ -115,14 +115,14 @@ export default class Bandwidth extends HttpModule {
 
         var labels = this._timingLabels,
             progressID = this._progressID++,
-            markLabel = labels.progress +'-'+ progressID,
+            markLabel = `${labels.progress}-${progressID}`,
             loaded = event.loaded;
 
         Timing.mark(markLabel);
 
         // Measure the average speed (B/s) since the request started
         var avgMeasure = Timing.measure(
-                labels.measure +'-avg-'+ progressID,
+                `${labels.measure}-avg-${progressID}`,
                 labels.start,
                 markLabel
             ),
@@ -135,9 +135,9 @@ export default class Bandwidth extends HttpModule {
         } else {
             // Measure the instant speed (B/s), which defines the speed between two progress events.
             var instantMeasure = Timing.measure(
-                labels.measure +'-instant-'+ progressID,
+                `${labels.measure}-instant-${progressID}`,
                 // Set the mark of the previous progress event as the starting point
-                labels.progress +'-'+ (progressID - 1),
+                `${labels.progress}-${progressID - 1}`,
                 markLabel
             );
             instantSpeed = (loaded - this._lastLoadedValue) / instantMeasure * 1000;

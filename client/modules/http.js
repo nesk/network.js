@@ -64,17 +64,20 @@ export default class HttpModule extends EventDispatcher {
 
         // Generate an URL token to avoid any caching issues. This token will also allow to identify the request in the
         // Resource Timing entries.
-        this._lastURLToken = 'speedtest-'+ (new Date).getTime();
+        var tokenSuffix = (new Date).getTime();
+        this._lastURLToken = `speedtest-${tokenSuffix}`;
 
         // Append the query parameters
         var url = options.endpoint;
-            url += (~url.indexOf('?') ? '&' : '?') + 'module=' + this._moduleName;
+        url += ~url.indexOf('?') ? '&' : '?';
+        url += `module=${this._moduleName}`;
 
         Object.keys(queryParams).forEach(param => {
-            url += '&' + param + '=' + encodeURIComponent(queryParams[param]);
+            var value = encodeURIComponent(queryParams[param]);
+            url += `&${param}=${value}`;
         });
 
-        url += '&' + this._lastURLToken;
+        url += `&${this._lastURLToken}`;
 
         xhr.open(httpMethod, url);
 
@@ -100,13 +103,13 @@ export default class HttpModule extends EventDispatcher {
                     return;
                 }
 
-                self.trigger('xhr-'+ eventType, xhr, ...arguments);
+                self.trigger(`xhr-${eventType}`, xhr, ...arguments);
             });
 
             // The XMLHttpRequestUpload interface supports all the above event types except the "readystatechange" one
             if (eventType != 'readystatechange') {
                 xhr.upload.addEventListener(eventType, function() {
-                    self.trigger('xhr-upload-'+ eventType, xhr, ...arguments);
+                    self.trigger(`xhr-upload-${eventType}`, xhr, ...arguments);
                 });
             }
         });
