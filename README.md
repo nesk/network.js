@@ -26,7 +26,7 @@ Latency measures can be __very far__ from reality if the browser doesn't have na
 
 ## Caveats
 
-* Latency measures always return __0__ in Firefox.
+* Latency measures never return any results with Firefox.
 * Chrome cannot upload a __~128 MB__ file, which will mainly affect fiber users.
 * Currently, the client and the server must be on the same domain or measures can't be done due to the [same-origin policy](http://en.wikipedia.org/wiki/Same-origin_policy).
 
@@ -47,6 +47,13 @@ var speed = new SpeedTest({
         // If the measure period can't reach the delay defined in the options, the
         // data amount is increased by the multiplier value.
         multiplier: 2
+    },
+
+    // Defines how many measures should be returned by the latency module and
+    // how much attempts to get a valid value should be done for each measure.
+    latency: {
+        measures: 5,
+        attempts: 3
     }
 });
 

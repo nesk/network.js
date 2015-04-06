@@ -70,7 +70,11 @@ $(function() {
         },
 
         value: function(value, unit) {
-            return '<span class="blue">' + value.toFixed(3) + ' ' + unit + '</span>';
+            if (value != null) {
+                return '<span class="blue">' + value.toFixed(3) + ' ' + unit + '</span>';
+            } else {
+                return '<span class="blue">null</span>';
+            }
         },
 
         delimiter: function(text) {

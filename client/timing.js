@@ -10,7 +10,7 @@ class Timing {
             performance: !!window.performance,
             userTiming: window.performance && performance.mark,
             resourceTiming: window.performance
-                            && (typeof(performance.getEntriesByType) == "function")
+                            && (typeof performance.getEntriesByType == "function")
                             && performance.timing
         };
     }
