@@ -12,11 +12,6 @@ export default class SpeedTest {
             ._setModule('download', new BandwidthModule('download', options));
     }
 
-    module(name)
-    {
-        return this._modules[name] || null;
-    }
-
     isRequesting()
     {
         var modules = this._modules,
@@ -34,7 +29,7 @@ export default class SpeedTest {
     _setModule(name, object)
     {
         if (object) {
-            this._modules[name] = object.on('_newRequest', () => !this.isRequesting());
+            this[name] = this._modules[name] = object.on('_newRequest', () => !this.isRequesting());
         }
 
         return this;

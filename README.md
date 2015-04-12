@@ -57,22 +57,19 @@ var speed = new SpeedTest({
     }
 });
 
-// Access the latency module.
-var latency = speed.module('latency');
-
 // Listen for the "end" event which provides the calculated latencies.
-latency.on('end', function(averageLatency, allLatencies) {
+speed.latency.on('end', function(averageLatency, allLatencies) {
     // "allLatencies" is an array containing the five calculated latencies in
     // milliseconds. They're used to determine an average latency.
     console.log('end', averageLatency, allLatencies);
 });
 
 // Once all the configuration is done, start the requests for this module.
-latency.start();
+speed.latency.start();
 
 // It is possible to chain functions for all the modules, here's an example with the
 // upload module.
-speed.module('upload')
+speed.upload
      .on('start', function(dataSize) {
          console.log('start', dataSize);
      })
@@ -92,9 +89,9 @@ speed.module('upload')
      .start();
 
 // You can also cancel a request (except for the "latency" module).
-speed.module('upload').abort();
+speed.upload.abort();
 
-speed.module('download')
+speed.download
      .on('start', function(dataSize) {
          console.log('start', dataSize);
      })
@@ -109,7 +106,7 @@ speed.module('download')
      })
      .start();
 
-speed.module('download').abort();
+speed.download.abort();
 ```
 
 ## Compilation
