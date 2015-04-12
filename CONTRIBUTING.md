@@ -1,8 +1,18 @@
-> I want to contribute but I don't understand how the project is divided, where do I start?
+Before you submit any pull request, please check if your code can pass all the tests by running:
+
+```shell
+npm test
+```
+
+If your code contains new features, add the corresponding tests.
+
+# Architecture
+
+> I want to contribute but I don't understand how the project is organized, where do I start?
 
 The project is divided in two parts. One client and many servers (currently, there's only the PHP version). The goal is to provide a few servers for various platforms (PHP, Node, .Net, Python, etc...).
 
-# Server
+## Server
 
 The server part has only one job: respond to the client. It must provide appropriate headers for the latency tests, configure the platform to allow large uploads and return large chunks of data for the download tests.
 
@@ -20,7 +30,7 @@ The easiest way to generate some data is to return a simple string concatenated 
 
 That's it for the server part, [check my PHP implementation](server/server.php) if you need some context.
 
-# Client
+## Client
 
 The client part is written in ES6 and transpiled to ES5 using [Babel](http://babeljs.io/). It is composed of one main class (`SpeedTest`) which is divided into modules: _latency_ (`LatencyModule`), _upload_ (`BandwidthModule`), _download_ (`BandwidthModule`). Each of them inherits from the _http_ module (`HttpModule`) which inherits from the _event dispatcher_ (`EventDispatcher`).
 

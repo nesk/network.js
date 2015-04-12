@@ -28,5 +28,5 @@ export function defer(cb = () => {})
             if (this.cb) this.cb();
             delete this.cb;
         }
-    }
+    };
 }

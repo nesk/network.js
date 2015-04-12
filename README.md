@@ -126,6 +126,12 @@ There's also a `watch` script which compiles the project whenever a file is chan
 npm run watch
 ```
 
+To check if the project passes all the tests, run:
+
+```shell
+npm test
+```
+
 ## Contribution
 
 Read the [CONTRIBUTING](CONTRIBUTING.md) file.

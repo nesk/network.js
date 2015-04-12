@@ -20,17 +20,23 @@
   "devDependencies": {
     "babelify": "~5.0.4",
     "browserify": "^9.0.3",
+    "chai": "^2.2.0",
+    "chai-spies": "^0.5.1",
     "chalk": "^1.0.0",
     "exorcist": "^0.1.6",
     "gulp": "^3.8.11",
     "gulp-rename": "^1.2.0",
     "gulp-sourcemaps": "^1.5.1",
     "gulp-uglify": "^1.1.0",
+    "mocha": "^2.2.4",
+    "mocha-phantomjs": "^3.5.3",
+    "phantomjs": "^1.9.16",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {
     "build": "gulp",
-    "watch": "gulp && echo '\\n' && gulp watch"
+    "watch": "gulp && echo '\\n' && gulp watch",
+    "test": "gulp; echo '\\n'; mocha-phantomjs test/test.html"
   }
 }
