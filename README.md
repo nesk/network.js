@@ -1,4 +1,4 @@
-# SpeedTest (under development)
+# SpeedTest [![Build Status](https://travis-ci.org/nesk/speedtest.svg?branch=master)](https://travis-ci.org/nesk/speedtest)
 
 A __JavaScript__ library to measure various aspects of a connection. It can accurately estimate a bandwidth/latency between a client (using a web browser) and a server (running a specific script).
 
