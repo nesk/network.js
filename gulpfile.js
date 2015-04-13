@@ -21,7 +21,7 @@ var rename = require('gulp-rename'),
  */
 
 var paths = {
-    src: './lib/speedtest.js',
+    src: './lib/SpeedTest.js',
     dest: 'dist',
     watch: ['lib/**', 'utils/**']
 };
