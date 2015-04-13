@@ -90,5 +90,15 @@ function commonModulesIt(moduleName) {
             expect(spy).to.not.have.been.called;
         });
 
+        it("should properly propagate `false` return values of event handlers", function() {
+            var module = (new SpeedTest)[moduleName];
+
+            var returnVal = module.on('event-test', function(){
+                return false;
+            }).trigger('event-test');
+
+            expect(returnVal).to.be.false;
+        });
+
     };
 }
