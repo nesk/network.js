@@ -6,6 +6,7 @@ describe("SpeedTest instances", function() {
         var speed = new SpeedTest,
             api = ['SpeedTest', {
                 latency: ['LatencyModule', {
+                    settings: 'function',
                     start: 'function',
                     isRequesting: 'function',
                     on: 'function',
@@ -14,6 +15,7 @@ describe("SpeedTest instances", function() {
                 }],
 
                 upload: ['BandwidthModule', {
+                    settings: 'function',
                     start: 'function',
                     abort: 'function',
                     isRequesting: 'function',
@@ -23,6 +25,7 @@ describe("SpeedTest instances", function() {
                 }],
 
                 download: ['BandwidthModule', {
+                    settings: 'function',
                     start: 'function',
                     abort: 'function',
                     isRequesting: 'function',
@@ -31,10 +34,69 @@ describe("SpeedTest instances", function() {
                     trigger: 'function'
                 }],
 
+                settings: 'function',
                 isRequesting: 'function'
             }];
 
         checkApiIntegrity(speed, api, 'speed');
+    });
+
+    it("should properly register new settings and return them", function() {
+        var speed = new SpeedTest({
+            endpoint: '/all/',
+            delay: 7000,
+            measures: 10,
+            unknown_property: true,
+
+            data: {
+                multiplier: 1.5
+            },
+
+            latency: {
+                endpoint: '/latency/',
+            },
+
+            upload: {
+                endpoint: '/upload/',
+                delay: 10000
+            },
+
+            download: {
+                endpoint: '/download/',
+
+                data: {
+                    multiplier: 1.8
+                }
+            }
+        });
+
+        expect(speed.settings()).to.deep.equal({
+            latency: {
+                endpoint: '/latency/',
+                measures: 10,
+                attempts: 3
+            },
+
+            upload: {
+                endpoint: '/upload/',
+                delay: 10000,
+
+                data: {
+                    size: 2 * 1024 * 1024,
+                    multiplier: 1.5
+                }
+            },
+
+            download: {
+                endpoint: '/download/',
+                delay: 7000,
+
+                data: {
+                    size: 10 * 1024 * 1024,
+                    multiplier: 1.8
+                }
+            }
+        });
     });
 
 });

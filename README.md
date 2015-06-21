@@ -34,28 +34,11 @@ Latency measures can be __very far__ from reality if the browser doesn't have na
 
 ```js
 // Create a new SpeedTest instance by providing an optional object.
-// N.B. The following options are the default ones.
-var speed = new SpeedTest({
-    endpoint: './speedtest.php', // Where is located your `speedtest.php` file.
-    delay: 8000, // The delay while you want to take measures for a bandwidth measure.
+var settings = {
+    // The settings list is available below.
+};
 
-    // Defines the amount of data to initially use for each bandwidth module.
-    dataSize: {
-        upload: 2 * 1024 * 1024, // 2 MB
-        download: 10 * 1024 * 1024, // 10 MB
-
-        // If the measure period can't reach the delay defined in the options, the
-        // data amount is increased by the multiplier value.
-        multiplier: 2
-    },
-
-    // Defines how many measures should be returned by the latency module and
-    // how much attempts to get a valid value should be done for each measure.
-    latency: {
-        measures: 5,
-        attempts: 3
-    }
-});
+var speed = new SpeedTest(settings);
 
 // Listen for the "end" event which provides the calculated latencies.
 speed.latency.on('end', function(averageLatency, allLatencies) {
@@ -109,6 +92,89 @@ speed.download
 speed.download.abort();
 ```
 
+### Settings
+
+The available settings with their default values:
+
+```js
+{
+    latency: {
+        // Where is located your `speedtest.php` file.
+        endpoint: './speedtest.php',
+        // How many measures should be returned.
+        measures: 5,
+        // How much attempts to get a valid value should be done for each measure.
+        attempts: 3
+    },
+
+    upload: {
+        // Where is located your `speedtest.php` file.
+        endpoint: './speedtest.php',
+        // The delay while you want to take measures.
+        delay: 8000,
+
+        data: {
+            // The amount of data to initially use.
+            size: 2 * 1024 * 1024, // 2 MB
+
+            // If the measure period can't reach the delay defined in the settings,
+            // the data amount is multiplied by the following value.
+            multiplier: 2
+        }
+    },
+
+    download: {
+        // Where is located your `speedtest.php` file.
+        endpoint: './speedtest.php',
+        // The delay while you want to take measures.
+        delay: 8000,
+
+        data: {
+            // The amount of data to initially use.
+            size: 10 * 1024 * 1024, // 10 MB
+
+            // If the measure period can't reach the delay defined in the settings,
+            // the data amount is multiplied by the following value.
+            multiplier: 2
+        }
+    }
+}
+```
+
+Here is an example usage:
+
+```js
+var speed = new SpeedTest({
+    // If you define a value at the top level of the object,
+    // it will be applied to every module.
+    endpoint: './my-new-endpoint/',
+
+    download: {
+        data: {
+            multiplier: 2.5
+        }
+    }
+});
+```
+
+You can also redefine settings whenever you want:
+
+```js
+// The `settings()` method takes an object in parameter.
+speed.settings({
+    endpoint: './my-second-new-endpoint'
+});
+
+// Without any parameters, it will return the current settings.
+console.log(speed.settings()); // Prints the current settings in the console.
+
+// Each module has a `settings()` method that works the same way.
+speed.latency.settings({
+    measures: 10
+});
+console.log(speed.latency.settings());
+```
+
 ## Compilation
 
 To compile the project, install the latest version of [Node](http://nodejs.org/) and run these commands inside a terminal:
@@ -140,4 +206,4 @@ Read the [CONTRIBUTING](CONTRIBUTING.md) file.
 
 This project is licensed under [the MIT license](LICENSE), check [TLDRLegal for details](https://tldrlegal.com/license/mit-license).
 
-[1]: https://github.com/Fyrd/caniuse/blob/master/features-json/xhr2.json#L22
+[1]: https://github.com/Fyrd/caniuse/blob/9dddd0e5a10a95375e8374f4b81a676e6e01d676/features-json/xhr2.json#L22
