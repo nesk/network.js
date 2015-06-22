@@ -3,6 +3,8 @@
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
+var _defineProperty = function (obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); };
+
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
@@ -17,42 +19,127 @@ var BandwidthModule = _interopRequire(require("./Http/BandwidthModule"));
 
 var Timing = _interopRequire(require("./Timing"));
 
-var assign = require("../utils/helpers").assign;
+var _utilsHelpers = require("../utils/helpers");
+
+var isObject = _utilsHelpers.isObject;
+var assign = _utilsHelpers.assign;
+var except = _utilsHelpers.except;
 
 var SpeedTest = (function () {
     function SpeedTest() {
-        var options = arguments[0] === undefined ? {} : arguments[0];
+        var settings = arguments[0] === undefined ? {} : arguments[0];
 
         _classCallCheck(this, SpeedTest);
 
-        // Initialize the modules
         this._modules = {};
-        this._setModule("latency", new LatencyModule(options))._setModule("upload", new BandwidthModule("upload", options))._setModule("download", new BandwidthModule("download", options));
+        this._modulesInitialized = false;
+        this._pendingSettings = {};
+
+        this._registerModule("latency", function (settings) {
+            return new LatencyModule(settings);
+        })._registerModule("upload", function (settings) {
+            return new BandwidthModule("upload", settings);
+        })._registerModule("download", function (settings) {
+            return new BandwidthModule("download", settings);
+        });
+
+        this._initModules(this.settings(settings));
     }
 
     _createClass(SpeedTest, {
+        settings: {
+            value: (function (_settings) {
+                var _settingsWrapper = function settings() {
+                    return _settings.apply(this, arguments);
+                };
+
+                _settingsWrapper.toString = function () {
+                    return _settings.toString();
+                };
+
+                return _settingsWrapper;
+            })(function () {
+                var _this = this;
+
+                var settings = arguments[0] === undefined ? null : arguments[0];
+
+                var moduleNames = Object.keys(this._modules);
+
+                if (isObject(settings)) {
+                    var _ret = (function () {
+                        // Extract the global settings
+                        var globalSettings = except(settings, moduleNames);
+
+                        // Extract the local settings
+                        var localSettings = except(settings, Object.keys(globalSettings));
+
+                        // Create new settings with the global ones nested in the local ones
+                        settings = moduleNames.reduce(function (settings, moduleName) {
+                            return assign(settings, _defineProperty({}, moduleName, globalSettings));
+                        }, {});
+
+                        // Apply the local settings to the new settings
+                        settings = assign(settings, localSettings);
+
+                        // Apply the settings to the modules
+                        if (_this._modulesInitialized) {
+                            Object.keys(_this._modules).forEach(function (name) {
+                                _this._modules[name].settings(settings[name]);
+                            });
+                        }
+
+                        // If the modules aren't instanciated, store the settings.
+                        else {
+                            _this._pendingSettings = settings;
+                        }
+
+                        return {
+                            v: _this
+                        };
+                    })();
+
+                    if (typeof _ret === "object") return _ret.v;
+                } else {
+                    return moduleNames.reduce(function (settings, moduleName) {
+                        return assign(settings, _defineProperty({}, moduleName, _this._modules[moduleName].settings()));
+                    }, {});
+                }
+            })
+        },
         isRequesting: {
             value: function isRequesting() {
-                var modules = this._modules,
-                    requesting = false;
+                var requesting = false;
 
-                for (var i in modules) {
-                    if (modules.hasOwnProperty(i)) {
-                        requesting = requesting || modules[i].isRequesting();
+                for (var _name in this._modules) {
+                    if (this._modules.hasOwnProperty(_name)) {
+                        requesting = requesting || this._modules[_name].isRequesting();
                     }
                 }
 
                 return requesting;
             }
         },
-        _setModule: {
-            value: function _setModule(name, object) {
+        _registerModule: {
+            value: function _registerModule(name, moduleCallback) {
+                this._modules[name] = moduleCallback;
+                return this;
+            }
+        },
+        _initModules: {
+            value: function _initModules() {
                 var _this = this;
 
-                if (object) {
-                    this[name] = this._modules[name] = object.on("_newRequest", function () {
-                        return !_this.isRequesting();
+                if (!this._modulesInitialized) {
+                    // Initialize the modules with their respective settings
+                    Object.keys(this._modules).forEach(function (name) {
+                        _this._modules[name] = _this._modules[name](_this._pendingSettings[name]).on("_newRequest", function () {
+                            return !_this.isRequesting();
+                        });
+
+                        _this[name] = _this._modules[name];
                     });
+
+                    this._modulesInitialized = true;
                 }
 
                 return this;
@@ -184,31 +271,27 @@ var HttpModule = _interopRequire(require("./HttpModule"));
 
 var Timing = _interopRequire(require("../Timing"));
 
-var _utilsHelpers = require("../../utils/helpers");
-
-var assign = _utilsHelpers.assign;
-var defer = _utilsHelpers.defer;
+var defer = require("../../utils/helpers").defer;
 
 var BandwidthModule = (function (_HttpModule) {
     function BandwidthModule(loadingType) {
         var _this = this;
 
-        var options = arguments[1] === undefined ? {} : arguments[1];
+        var settings = arguments[1] === undefined ? {} : arguments[1];
 
         _classCallCheck(this, BandwidthModule);
 
-        // Instanciate the parent
         loadingType = ~["upload", "download"].indexOf(loadingType) ? loadingType : "download";
 
-        options = assign({
-            dataSize: {
-                upload: 2 * 1024 * 1024, // 2 MB
-                download: 10 * 1024 * 1024, // 10 MB
+        this._enhanceDefaultSettings({
+            data: {
+                // 2 MB for upload, 10 MB for download
+                size: loadingType == "upload" ? 2 * 1024 * 1024 : 10 * 1024 * 1024,
                 multiplier: 2
             }
-        }, options);
+        });
 
-        _get(Object.getPrototypeOf(BandwidthModule.prototype), "constructor", this).call(this, loadingType, options);
+        _get(Object.getPrototypeOf(BandwidthModule.prototype), "constructor", this).call(this, loadingType, settings);
 
         // Define the object properties
         this._loadingType = loadingType;
@@ -265,7 +348,7 @@ var BandwidthModule = (function (_HttpModule) {
         start: {
             value: function start() {
                 var loadingType = this._loadingType,
-                    dataSize = this._options.dataSize,
+                    dataSettings = this.settings().data,
                     reqID = this._requestID++;
 
                 this._intendedEnd = false;
@@ -277,7 +360,7 @@ var BandwidthModule = (function (_HttpModule) {
 
                 // Trigger the start event
                 if (!this._isRestarting) {
-                    this.trigger("start", loadingType == "upload" ? dataSize.upload : dataSize.download);
+                    this.trigger("start", dataSettings.size);
                 }
 
                 // Create unique timing labels for the new request
@@ -291,13 +374,13 @@ var BandwidthModule = (function (_HttpModule) {
                 // of a bug in Chrome (tested in v33.0.1750.146), causing a freeze of the page while trying to directly upload
                 // an ArrayBuffer (through an ArrayBufferView). The freeze lasts nearly 4.5s for 10MB of data. Using a Blob
                 // seems to solve the problem.
-                var blob = loadingType == "upload" ? new Blob([new ArrayBuffer(dataSize.upload)]) : null;
+                var blob = loadingType == "upload" ? new Blob([new ArrayBuffer(dataSettings.size)]) : null;
 
                 var type = loadingType == "download" ? "GET" : "POST";
 
                 // Initiate and send a new request
                 this._newRequest(type, {
-                    size: dataSize.download
+                    size: dataSettings.size
                 })._sendRequest(blob);
             }
         },
@@ -370,12 +453,11 @@ var BandwidthModule = (function (_HttpModule) {
                 // The request ended to early, restart it with an increased data size.
                 else {
                     var loadingType = this._loadingType,
-                        dataSize = this._options.dataSize;
+                        dataSettings = this.settings().data;
 
-                    dataSize.upload *= dataSize.multiplier;
-                    dataSize.download *= dataSize.multiplier;
+                    dataSettings.size *= dataSettings.multiplier;
 
-                    this.trigger("restart", loadingType == "upload" ? dataSize.upload : dataSize.download);
+                    this.trigger("restart", dataSettings.size);
 
                     this._isRestarting = true;
                     this.start();
@@ -406,25 +488,29 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 
 var EventDispatcher = _interopRequire(require("../EventDispatcher"));
 
-var assign = require("../../utils/helpers").assign;
+var _utilsHelpers = require("../../utils/helpers");
+
+var isObject = _utilsHelpers.isObject;
+var assign = _utilsHelpers.assign;
+var assignStrict = _utilsHelpers.assignStrict;
 
 var HttpModule = (function (_EventDispatcher) {
     function HttpModule(moduleName) {
         var _this = this;
 
-        var options = arguments[1] === undefined ? {} : arguments[1];
+        var settings = arguments[1] === undefined ? {} : arguments[1];
 
         _classCallCheck(this, HttpModule);
 
         _get(Object.getPrototypeOf(HttpModule.prototype), "constructor", this).call(this);
 
-        options = assign({
+        this._enhanceDefaultSettings({
             endpoint: "./speedtest.php",
             delay: 8000
-        }, options);
+        });
 
-        // Define the object properties
-        this._options = options;
+        this.settings(settings);
+
         this._moduleName = moduleName;
         this._xhr = null;
         this._lastURLToken = null;
@@ -450,9 +536,36 @@ var HttpModule = (function (_EventDispatcher) {
     _inherits(HttpModule, _EventDispatcher);
 
     _createClass(HttpModule, {
+        settings: {
+            value: (function (_settings) {
+                var _settingsWrapper = function settings() {
+                    return _settings.apply(this, arguments);
+                };
+
+                _settingsWrapper.toString = function () {
+                    return _settings.toString();
+                };
+
+                return _settingsWrapper;
+            })(function () {
+                var settings = arguments[0] === undefined ? null : arguments[0];
+
+                if (isObject(settings)) {
+                    this._settings = assignStrict(this._defaultSettings || {}, this._settings || {}, settings);
+                    return this;
+                } else {
+                    return this._settings || this._defaultSettings || {};
+                }
+            })
+        },
         isRequesting: {
             value: function isRequesting() {
                 return this._requesting;
+            }
+        },
+        _enhanceDefaultSettings: {
+            value: function _enhanceDefaultSettings(settings) {
+                this._defaultSettings = assign(this._defaultSettings || {}, settings);
             }
         },
         _newRequest: {
@@ -465,7 +578,7 @@ var HttpModule = (function (_EventDispatcher) {
                     return this;
                 }
 
-                var options = this._options,
+                var settings = this.settings(),
                     xhr = new XMLHttpRequest(),
                     validHttpMethods = ["GET", "POST"];
 
@@ -483,7 +596,7 @@ var HttpModule = (function (_EventDispatcher) {
                 this._lastURLToken = "speedtest-" + tokenSuffix;
 
                 // Append the query parameters
-                var url = options.endpoint;
+                var url = settings.endpoint;
                 url += ~url.indexOf("?") ? "&" : "?";
                 url += "module=" + this._moduleName;
 
@@ -497,7 +610,7 @@ var HttpModule = (function (_EventDispatcher) {
                 xhr.open(httpMethod, url);
 
                 // Define the timeout of the request
-                xhr.timeout = options.delay;
+                xhr.timeout = settings.delay;
 
                 // Abort the previous request if it hasn't been sent
                 if (this._xhr && this._xhr.readyState == XMLHttpRequest.OPENED) {
@@ -601,26 +714,29 @@ var HttpModule = _interopRequire(require("./HttpModule"));
 
 var Timing = _interopRequire(require("../Timing"));
 
-var assign = require("../../utils/helpers").assign;
+var _utilsHelpers = require("../../utils/helpers");
+
+var isObject = _utilsHelpers.isObject;
+var assignStrict = _utilsHelpers.assignStrict;
+var except = _utilsHelpers.except;
 
 var LatencyModule = (function (_HttpModule) {
     function LatencyModule() {
         var _this = this;
 
-        var options = arguments[0] === undefined ? {} : arguments[0];
+        var settings = arguments[0] === undefined ? {} : arguments[0];
 
         _classCallCheck(this, LatencyModule);
 
-        options = assign({
-            latency: {
-                measures: 5,
-                attempts: 3
-            }
-        }, options, {
-            delay: 0 // We dont want any timeout during a latency calculation
+        this._enhanceDefaultSettings({
+            measures: 5,
+            attempts: 3
         });
 
-        _get(Object.getPrototypeOf(LatencyModule.prototype), "constructor", this).call(this, "latency", options);
+        _get(Object.getPrototypeOf(LatencyModule.prototype), "constructor", this).call(this, "latency");
+
+        // Don't use the settings method of parent class but the overridden one in this class
+        this.settings(settings);
 
         // Define the object properties
         this._requestsLeft = 0;
@@ -660,14 +776,37 @@ var LatencyModule = (function (_HttpModule) {
     _inherits(LatencyModule, _HttpModule);
 
     _createClass(LatencyModule, {
+        settings: {
+            value: (function (_settings) {
+                var _settingsWrapper = function settings() {
+                    return _settings.apply(this, arguments);
+                };
+
+                _settingsWrapper.toString = function () {
+                    return _settings.toString();
+                };
+
+                return _settingsWrapper;
+            })(function () {
+                var settings = arguments[0] === undefined ? null : arguments[0];
+
+                if (isObject(settings)) {
+                    return _get(Object.getPrototypeOf(LatencyModule.prototype), "settings", this).call(this, assignStrict(settings, {
+                        delay: 0 // We dont want any timeout during a latency calculation
+                    }));
+                } else {
+                    return except(_get(Object.getPrototypeOf(LatencyModule.prototype), "settings", this).call(this), ["delay"]);
+                }
+            })
+        },
         start: {
             value: function start() {
                 // Set the number of requests required to establish the network latency. If the browser doesn't support the
                 // Resource Timing API, add a request that will be ignored to avoid a longer request due to a possible
                 // DNS/whatever fetch.
-                var _options$latency = this._options.latency;
-                var measures = _options$latency.measures;
-                var attempts = _options$latency.attempts;
+                var _settings$latency = this._settings.latency;
+                var measures = _settings$latency.measures;
+                var attempts = _settings$latency.attempts;
 
                 this._requestsLeft = measures;
                 this._attemptsLeft = attempts * measures;
@@ -736,7 +875,7 @@ var LatencyModule = (function (_HttpModule) {
                 }
 
                 // Without Resource Timing API
-                else if (this._requestsLeft < this._options.latency.measures) {
+                else if (this._requestsLeft < this._settings.latency.measures) {
 
                     // Measure and save the latency if the headers have been received
                     if (xhr.readyState == XMLHttpRequest.HEADERS_RECEIVED) {
@@ -770,12 +909,12 @@ var LatencyModule = (function (_HttpModule) {
                 avgLatency = avgLatency || null;
 
                 // If there is not enough measures, display a warning.
-                if (latencies.length < this._options.latency.measures) {
-                    var _options$latency = this._options.latency;
-                    var measures = _options$latency.measures;
-                    var attempts = _options$latency.attempts;
+                if (latencies.length < this._settings.latency.measures) {
+                    var _settings$latency = this._settings.latency;
+                    var measures = _settings$latency.measures;
+                    var attempts = _settings$latency.attempts;
 
-                    console.warn(["An insufficient number of measures have been processed, this could be due to your web server using", "persistant connections or to your client options (measures: " + measures + ", attempts: " + attempts + ")"].join(" "));
+                    console.warn(["An insufficient number of measures have been processed, this could be due to your web server using", "persistant connections or to your client settings (measures: " + measures + ", attempts: " + attempts + ")"].join(" "));
                 }
 
                 // Trigger the "end" event with the average latency and the latency list as parameters
@@ -866,7 +1005,10 @@ var _createClass = (function () { function defineProperties(target, props) { for
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
 exports.isObject = isObject;
+exports.copy = copy;
 exports.assign = assign;
+exports.assignStrict = assignStrict;
+exports.except = except;
 exports.defer = defer;
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -876,6 +1018,30 @@ function isObject(obj) {
     return obj != undefined && obj != null && typeof obj.valueOf() == "object";
 }
 
+function copy(value) {
+    return JSON.parse(JSON.stringify(value));
+}
+
+function _assign() {
+    for (var _len = arguments.length, sources = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+        sources[_key - 2] = arguments[_key];
+    }
+
+    var strict = arguments[0] === undefined ? false : arguments[0];
+    var target = arguments[1] === undefined ? {} : arguments[1];
+
+    sources.forEach(function (source) {
+        Object.keys(source).forEach(function (key) {
+            if (!strict || target.hasOwnProperty(key)) {
+                var value = source[key];
+                target[key] = isObject(value) ? assign(target[key], value) : value;
+            }
+        });
+    });
+
+    return target;
+}
+
 function assign() {
     for (var _len = arguments.length, sources = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
         sources[_key - 1] = arguments[_key];
@@ -883,14 +1049,27 @@ function assign() {
 
     var target = arguments[0] === undefined ? {} : arguments[0];
 
-    sources.forEach(function (source) {
-        Object.keys(source).forEach(function (key) {
-            var value = source[key];
-            target[key] = isObject(value) ? assign(target[key], value) : value;
-        });
+    return _assign.apply(undefined, [false, target].concat(sources));
+}
+
+function assignStrict() {
+    for (var _len = arguments.length, sources = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        sources[_key - 1] = arguments[_key];
+    }
+
+    var target = arguments[0] === undefined ? {} : arguments[0];
+
+    return _assign.apply(undefined, [true, target].concat(sources));
+}
+
+function except(obj, indexes) {
+    var objCopy = copy(obj);
+
+    indexes.forEach(function (index) {
+        return delete objCopy[index];
     });
 
-    return target;
+    return objCopy;
 }
 
 function defer() {
