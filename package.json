@@ -1,22 +1,25 @@
 {
-  "name": "speedtest",
+  "name": "network-js",
   "version": "2.0.0-alpha",
   "description": "Test your connection speed without Flash: only JavaScript!",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nesk/speedtest.git"
+    "url": "https://github.com/nesk/network.js.git"
   },
   "keywords": [
+    "network",
     "speed",
     "test",
+    "latency",
+    "bandwidth",
     "connection"
   ],
   "author": "Johann Pardanaud",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nesk/speedtest/issues"
+    "url": "https://github.com/nesk/network.js/issues"
   },
-  "homepage": "https://github.com/nesk/speedtest",
+  "homepage": "https://github.com/nesk/network.js",
   "devDependencies": {
     "babelify": "~5.0.4",
     "browserify": "^9.0.3",

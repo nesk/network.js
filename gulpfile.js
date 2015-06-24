@@ -21,14 +21,14 @@ var rename = require('gulp-rename'),
  */
 
 var paths = {
-    src: './lib/SpeedTest.js',
+    src: './lib/Network.js',
     dest: 'dist',
     watch: ['lib/**', 'utils/**']
 };
 
 var names = {
-    base: 'speedtest.js',
-    min: 'speedtest.min.js'
+    base: 'network.js',
+    min: 'network.min.js'
 };
 
 /*
@@ -47,7 +47,7 @@ function error(error) {
 gulp.task('default', function() {
     return browserify({
         entries: paths.src,
-        standalone: 'SpeedTest',
+        standalone: 'Network',
         debug: true
     })
         .transform(babelify)

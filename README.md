@@ -1,12 +1,12 @@
-# SpeedTest [![Build Status](https://travis-ci.org/nesk/speedtest.svg?branch=master)](https://travis-ci.org/nesk/speedtest)
+# Network.js [![Build Status](https://travis-ci.org/nesk/network.js.svg?branch=master)](https://travis-ci.org/nesk/network.js)
 
 A __JavaScript__ library to measure various aspects of a connection. It can accurately estimate a bandwidth/latency between a client (using a web browser) and a server (running a specific script).
 
 ## Compatibility
 
-SpeedTest is based on two browser features: [Resource Timing](http://caniuse.com/#feat=resource-timing) and [XMLHttpRequest (v2)](http://caniuse.com/#feat=xhr2). While the first one [can be polyfilled](client/timing.js), the second one is a requirement.
+Network.js is based on two browser features: [Resource Timing](http://caniuse.com/#feat=resource-timing) and [XMLHttpRequest (v2)](http://caniuse.com/#feat=xhr2). While the first one [can be polyfilled](client/timing.js), the second one is a requirement.
 
-Thus, SpeedTest should be compatible with:
+Thus, Network.js should be compatible with:
 
 | Browser              | Partial support (polyfill) | Native support |
 | -------------------- | :-------------------:      | :------------: |
@@ -33,26 +33,26 @@ Latency measures can be __very far__ from reality if the browser doesn't have na
 ## How to use
 
 ```js
-// Create a new SpeedTest instance by providing an optional object.
+// Create a new Network instance by providing an optional object.
 var settings = {
     // The settings list is available below.
 };
 
-var speed = new SpeedTest(settings);
+var net = new Network(settings);
 
 // Listen for the "end" event which provides the calculated latencies.
-speed.latency.on('end', function(averageLatency, allLatencies) {
+net.latency.on('end', function(averageLatency, allLatencies) {
     // "allLatencies" is an array containing the five calculated latencies in
     // milliseconds. They're used to determine an average latency.
     console.log('end', averageLatency, allLatencies);
 });
 
 // Once all the configuration is done, start the requests for this module.
-speed.latency.start();
+net.latency.start();
 
 // It is possible to chain functions for all the modules, here's an example with the
 // upload module.
-speed.upload
+net.upload
      .on('start', function(dataSize) {
          console.log('start', dataSize);
      })
@@ -72,9 +72,9 @@ speed.upload
      .start();
 
 // You can also cancel a request (except for the "latency" module).
-speed.upload.abort();
+net.upload.abort();
 
-speed.download
+net.download
      .on('start', function(dataSize) {
          console.log('start', dataSize);
      })
@@ -89,7 +89,7 @@ speed.download
      })
      .start();
 
-speed.download.abort();
+net.download.abort();
 ```
 
 ### Settings
@@ -99,8 +99,8 @@ The available settings with their default values:
 ```js
 {
     latency: {
-        // Where is located your `speedtest.php` file.
-        endpoint: './speedtest.php',
+        // Where is located your `network.php` file.
+        endpoint: './network.php',
         // How many measures should be returned.
         measures: 5,
         // How much attempts to get a valid value should be done for each measure.
@@ -108,8 +108,8 @@ The available settings with their default values:
     },
 
     upload: {
-        // Where is located your `speedtest.php` file.
-        endpoint: './speedtest.php',
+        // Where is located your `network.php` file.
+        endpoint: './network.php',
         // The delay while you want to take measures.
         delay: 8000,
 
@@ -124,8 +124,8 @@ The available settings with their default values:
     },
 
     download: {
-        // Where is located your `speedtest.php` file.
-        endpoint: './speedtest.php',
+        // Where is located your `network.php` file.
+        endpoint: './network.php',
         // The delay while you want to take measures.
         delay: 8000,
 
@@ -144,7 +144,7 @@ The available settings with their default values:
 Here is an example usage:
 
 ```js
-var speed = new SpeedTest({
+var net = new Network({
     // If you define a value at the top level of the object,
     // it will be applied to every module.
     endpoint: './my-new-endpoint/',
@@ -161,18 +161,18 @@ You can also redefine settings whenever you want:
 
 ```js
 // The `settings()` method takes an object in parameter.
-speed.settings({
+net.settings({
     endpoint: './my-second-new-endpoint'
 });
 
 // Without any parameters, it will return the current settings.
-console.log(speed.settings()); // Prints the current settings in the console.
+console.log(net.settings()); // Prints the current settings in the console.
 
 // Each module has a `settings()` method that works the same way.
-speed.latency.settings({
+net.latency.settings({
     measures: 10
 });
-console.log(speed.latency.settings());
+console.log(net.latency.settings());
 ```
 
 ## Compilation
@@ -180,8 +180,8 @@ console.log(speed.latency.settings());
 To compile the project, install the latest version of [Node](http://nodejs.org/) and run these commands inside a terminal:
 
 ```shell
-git clone https://github.com/Nesk/SpeedTest.git
-cd SpeedTest
+git clone https://github.com/nesk/network.js.git
+cd network.js
 npm install
 npm run build
 ```

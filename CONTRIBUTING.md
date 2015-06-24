@@ -32,7 +32,7 @@ That's it for the server part, [check my PHP implementation](server/server.php) 
 
 ## Client
 
-The client part is written in ES6 and transpiled to ES5 using [Babel](http://babeljs.io/). It is composed of one main class (`SpeedTest`) which is divided into modules: _latency_ (`LatencyModule`), _upload_ (`BandwidthModule`), _download_ (`BandwidthModule`). Each of them inherits from the _http_ module (`HttpModule`) which inherits from the _event dispatcher_ (`EventDispatcher`).
+The client part is written in ES6 and transpiled to ES5 using [Babel](http://babeljs.io/). It is composed of one main class (`Network`) which is divided into modules: _latency_ (`LatencyModule`), _upload_ (`BandwidthModule`), _download_ (`BandwidthModule`). Each of them inherits from the _http_ module (`HttpModule`) which inherits from the _event dispatcher_ (`EventDispatcher`).
 
 The `EventDispatcher` class provides the `on`, `off` and `trigger` methods which allows event management.
 
@@ -42,4 +42,4 @@ The `LatencyModule` and the `BandwidthModule` classes make all the calculations 
 
 These last two modules depend on the `Timing` class. It allows to check for Resource Timing support and provides two methods used to make measures based on the Performance API which fallback to DateTime calculations if the browser doesn't have the required APIs.
 
-Finally, the `SpeedTest` class initiates all the modules and makes them accessible through the `module` method (this will probably change). Like the `HttpModule` class, it provides an `isRequesting` method to check if __any__ module is currently making a request.
+Finally, the `Network` class initiates all the modules and makes them accessible through the `module` method (this will probably change). Like the `HttpModule` class, it provides an `isRequesting` method to check if __any__ module is currently making a request.

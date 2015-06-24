@@ -1,6 +1,6 @@
 $(function() {
 
-    var module; // Current SpeedTest's module
+    var module; // Current Network.js' module
 
     /*
      * Tooltips
@@ -24,11 +24,11 @@ $(function() {
             UI.$btnStart.prop('disabled', true);
             UI.$btnAbort.prop('disabled', false);
 
-            speed[rawModule].start();
+            net[rawModule].start();
 
             // The latency module doesn't have a start event, we must trigger it manually.
             if (rawModule == 'latency') {
-                speed[rawModule].trigger('start');
+                net[rawModule].trigger('start');
             }
         },
 
@@ -51,8 +51,8 @@ $(function() {
         },
 
         abort: function() {
-            speed.upload.abort();
-            speed.download.abort();
+            net.upload.abort();
+            net.download.abort();
         },
 
         notice: function(text, newSection) {
@@ -83,10 +83,10 @@ $(function() {
     };
 
     /*
-     * SpeedTest configuration
+     * Network.js configuration
      */
 
-    var speed = new SpeedTest();
+    var net = new Network();
 
     function start(size) {
         UI.notice(UI.delimiter(
@@ -108,10 +108,10 @@ $(function() {
         UI.stop();
     }
 
-    speed.upload.on('start', start).on('progress', progress).on('restart', UI.restart).on('end', end);
-    speed.download.on('start', start).on('progress', progress).on('restart', UI.restart).on('end', end);
+    net.upload.on('start', start).on('progress', progress).on('restart', UI.restart).on('end', end);
+    net.download.on('start', start).on('progress', progress).on('restart', UI.restart).on('end', end);
 
-    speed.latency
+    net.latency
         .on('start', start)
         .on('end', function(avg, all) {
             all = all.map(function(latency) {

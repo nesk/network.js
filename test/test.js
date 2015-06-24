@@ -1,10 +1,10 @@
-describe("SpeedTest instances", function() {
+describe("Network instances", function() {
 
     it("should expose the expected public API", function() {
-        SpeedTest._exposeInternalClasses();
+        Network._exposeInternalClasses();
 
-        var speed = new SpeedTest,
-            api = ['SpeedTest', {
+        var speed = new Network,
+            api = ['Network', {
                 latency: ['LatencyModule', {
                     settings: 'function',
                     start: 'function',
@@ -42,7 +42,7 @@ describe("SpeedTest instances", function() {
     });
 
     it("should properly register new settings and return them", function() {
-        var speed = new SpeedTest({
+        var speed = new Network({
             endpoint: '/all/',
             delay: 7000,
             measures: 10,
@@ -110,7 +110,7 @@ function commonModulesIt(moduleName) {
 
         it("should properly register and emit a single event", function() {
             var spy = chai.spy(),
-                module = (new SpeedTest)[moduleName];
+                module = (new Network)[moduleName];
 
             module.on('event-test', spy)
                   .trigger('event-test');
@@ -120,7 +120,7 @@ function commonModulesIt(moduleName) {
 
         it("should properly register and emit multiple events", function() {
             var spy = chai.spy(),
-                module = (new SpeedTest)[moduleName];
+                module = (new Network)[moduleName];
 
             module.on(['event-test-1', 'event-test-2'], spy);
             module.trigger('event-test-1');
@@ -131,7 +131,7 @@ function commonModulesIt(moduleName) {
 
         it("should properly deregister a single event", function() {
             var spy = chai.spy(),
-                module = (new SpeedTest)[moduleName];
+                module = (new Network)[moduleName];
 
             module.on('event-test', spy)
                   .off('event-test', spy)
@@ -142,7 +142,7 @@ function commonModulesIt(moduleName) {
 
         it("should properly deregister multiple events", function() {
             var spy = chai.spy(),
-                module = (new SpeedTest)[moduleName];
+                module = (new Network)[moduleName];
 
             module.on(['event-test-1', 'event-test-2'], spy)
                   .off(['event-test-1', 'event-test-2']);
@@ -153,7 +153,7 @@ function commonModulesIt(moduleName) {
         });
 
         it("should properly propagate `false` return values of event handlers", function() {
-            var module = (new SpeedTest)[moduleName];
+            var module = (new Network)[moduleName];
 
             var returnVal = module.on('event-test', function(){
                 return false;
