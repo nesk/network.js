@@ -4,7 +4,7 @@ A __JavaScript__ library to measure various aspects of a connection. It can accu
 
 ## Installation
 
-User Bower or [download a ZIP file](https://github.com/nesk/network-js/archive/master.zip):
+User Bower or [download a ZIP file](https://github.com/nesk/network.js/archive/master.zip):
 
 ```shell
 bower install --save network-js
