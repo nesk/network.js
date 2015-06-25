@@ -1,0 +1,30 @@
+{
+  "name": "network-js",
+  "version": "2.0.0-alpha",
+  "homepage": "https://github.com/nesk/network.js",
+  "authors": [
+    "Johann Pardanaud <pardanaud.j@gmail.com>"
+  ],
+  "description": "Test your connection speed without Flash: only JavaScript!",
+  "main": "dist/network.min.js",
+  "moduleType": [
+    "es6",
+    "globals"
+  ],
+  "keywords": [
+    "network",
+    "speed",
+    "test",
+    "latency",
+    "bandwidth",
+    "connection"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "gulpfile.js",
+    "node_modules",
+    "package.json",
+    "test"
+  ]
+}
