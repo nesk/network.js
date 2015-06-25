@@ -804,9 +804,11 @@ var LatencyModule = (function (_HttpModule) {
                 // Set the number of requests required to establish the network latency. If the browser doesn't support the
                 // Resource Timing API, add a request that will be ignored to avoid a longer request due to a possible
                 // DNS/whatever fetch.
-                var _settings$latency = this._settings.latency;
-                var measures = _settings$latency.measures;
-                var attempts = _settings$latency.attempts;
+
+                var _settings2 = this.settings();
+
+                var measures = _settings2.measures;
+                var attempts = _settings2.attempts;
 
                 this._requestsLeft = measures;
                 this._attemptsLeft = attempts * measures;
@@ -875,7 +877,7 @@ var LatencyModule = (function (_HttpModule) {
                 }
 
                 // Without Resource Timing API
-                else if (this._requestsLeft < this._settings.latency.measures) {
+                else if (this._requestsLeft < this.settings().measures) {
 
                     // Measure and save the latency if the headers have been received
                     if (xhr.readyState == XMLHttpRequest.HEADERS_RECEIVED) {
@@ -909,10 +911,11 @@ var LatencyModule = (function (_HttpModule) {
                 avgLatency = avgLatency || null;
 
                 // If there is not enough measures, display a warning.
-                if (latencies.length < this._settings.latency.measures) {
-                    var _settings$latency = this._settings.latency;
-                    var measures = _settings$latency.measures;
-                    var attempts = _settings$latency.attempts;
+                if (latencies.length < this.settings().measures) {
+                    var _settings2 = this.settings();
+
+                    var measures = _settings2.measures;
+                    var attempts = _settings2.attempts;
 
                     console.warn(["An insufficient number of measures have been processed, this could be due to your web server using", "persistant connections or to your client settings (measures: " + measures + ", attempts: " + attempts + ")"].join(" "));
                 }
