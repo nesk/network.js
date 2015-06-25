@@ -2,33 +2,17 @@
 
 A __JavaScript__ library to measure various aspects of a connection. It can accurately estimate a bandwidth/latency between a client (using a web browser) and a server (running a specific script).
 
-## Compatibility
+## Installation
 
-Network.js is based on two browser features: [Resource Timing](http://caniuse.com/#feat=resource-timing) and [XMLHttpRequest (v2)](http://caniuse.com/#feat=xhr2). While the first one [can be polyfilled](client/timing.js), the second one is a requirement.
+User Bower or [download a ZIP file](https://github.com/nesk/network-js/archive/master.zip):
 
-Thus, Network.js should be compatible with:
+```shell
+bower install --save network-js
+```
 
-| Browser              | Partial support (polyfill) | Native support |
-| -------------------- | :-------------------:      | :------------: |
-| IE 10+               |                            | ✔              |
-| Firefox 35+          |                            | ✔              |
-| [Chrome 29+][1]      |                            | ✔              |
-| Opera 15+            |                            | ✔              |
-| Android Browser 4.4+ |                            | ✔              |
-|                      |                            |                |
-| Safari 5+            | ✔                          |                |
-| iOS Safari 5.1+      | ✔                          |                |
-| [Firefox 12+][1]     | ✔                          |                |
-| Opera 12.1+          | ✔                          |                |
-| Android Browser 3+   | ✔                          |                |
-
-Latency measures can be __very far__ from reality if the browser doesn't have native support and uses the provided polyfill.
-
-## Caveats
-
-* Latency measures never return any results with Firefox.
-* Chrome cannot upload a __~128 MB__ file, which will mainly affect fiber users.
-* Currently, the client and the server must be on the same domain or measures can't be done due to the [same-origin policy](http://en.wikipedia.org/wiki/Same-origin_policy).
+```html
+<script src="bower_components/network-js/dist/network.min.js"></script>
+```
 
 ## How to use
 
@@ -174,6 +158,34 @@ net.latency.settings({
 });
 console.log(net.latency.settings());
 ```
+
+## Compatibility
+
+Network.js is based on two browser features: [Resource Timing](http://caniuse.com/#feat=resource-timing) and [XMLHttpRequest (v2)](http://caniuse.com/#feat=xhr2). While the first one [can be polyfilled](client/timing.js), the second one is a requirement.
+
+Thus, Network.js should be compatible with:
+
+| Browser              | Partial support (polyfill) | Native support |
+| -------------------- | :-------------------:      | :------------: |
+| IE 10+               |                            | ✔              |
+| Firefox 35+          |                            | ✔              |
+| [Chrome 29+][1]      |                            | ✔              |
+| Opera 15+            |                            | ✔              |
+| Android Browser 4.4+ |                            | ✔              |
+|                      |                            |                |
+| Safari 5+            | ✔                          |                |
+| iOS Safari 5.1+      | ✔                          |                |
+| [Firefox 12+][1]     | ✔                          |                |
+| Opera 12.1+          | ✔                          |                |
+| Android Browser 3+   | ✔                          |                |
+
+Latency measures can be __very far__ from reality if the browser doesn't have native support and uses the provided polyfill.
+
+## Caveats
+
+* Latency measures never return any results with Firefox.
+* Chrome cannot upload a __~128 MB__ file, which will mainly affect fiber users.
+* Currently, the client and the server must be on the same domain or measures can't be done due to the [same-origin policy](http://en.wikipedia.org/wiki/Same-origin_policy).
 
 ## Compilation
 
