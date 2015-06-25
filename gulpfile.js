@@ -1,10 +1,14 @@
+'use strict';
+
 /*
  * Requirements
  */
 
-var path = require('path');
+var path = require('path'),
+    spawn = require('child_process').spawn;
 
-var babelify = require('babelify'),
+var argv = require('yargs').argv,
+    babelify = require('babelify'),
     browserify = require('browserify'),
     buffer = require('vinyl-buffer'),
     chalk = require('chalk'),
@@ -12,7 +16,9 @@ var babelify = require('babelify'),
     gulp = require('gulp'),
     source = require('vinyl-source-stream');
 
-var rename = require('gulp-rename'),
+var bump = require('gulp-bump'),
+    git = require('gulp-git'),
+    rename = require('gulp-rename'),
     sourcemaps = require('gulp-sourcemaps'),
     uglify = require('gulp-uglify');
 
@@ -23,6 +29,8 @@ var rename = require('gulp-rename'),
 var paths = {
     src: './lib/Network.js',
     dest: 'dist',
+    versioning: ['bower.json', 'package.json'],
+    release: ['dist/**', 'bower.json', 'package.json'],
     watch: ['lib/**', 'utils/**']
 };
 
@@ -41,7 +49,7 @@ function error(error) {
 }
 
 /*
- * Tasks
+ * Standard tasks
  */
 
 gulp.task('default', function() {
@@ -62,6 +70,49 @@ gulp.task('default', function() {
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.dest));
 });
+
+gulp.task('test', ['default'], function(cb) {
+    spawn('mocha-phantomjs', ['test/test.html']).on('close', function(code) {
+        cb(code ? "Test failed. Run `npm test` for more details." : undefined);
+    });
+});
+
+/*
+ * Releasing tasks
+ */
+
+gulp.task('release', ['default', 'test', 'bump', 'commit', 'tag']);
+
+gulp.task('bump', ['test'], function() {
+    return gulp.src(paths.versioning)
+        .pipe(bump({version: argv.v}))
+        .pipe(gulp.dest('./'));
+});
+
+gulp.task('commit', ['bump'], function() {
+    return gulp.src(paths.release)
+        .pipe(git.add())
+        .pipe(git.commit('Bump to v' + argv.v));
+});
+
+gulp.task('tag', ['commit'], function(cb) {
+    var version = 'v' + argv.v;
+    git.tag(version, 'Release ' + version, cb);
+});
+
+/*
+ * Publishing tasks
+ */
+
+gulp.task('publish', function(cb) {
+    git.push('origin', 'master', {
+        args: '--tags'
+    }, cb);
+});
+
+/*
+ * Watching tasks
+ */
 
 gulp.task('watch', function(cb) {
     var watcher = gulp.watch(paths.watch, ['default']);
