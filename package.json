@@ -1,13 +1,14 @@
 {
   "name": "network-js",
   "version": "2.0.0-alpha2",
-  "description": "Test your connection speed without Flash: only JavaScript!",
+  "description": "Make accurate network measures in JavaScript",
   "repository": {
     "type": "git",
     "url": "https://github.com/nesk/network.js.git"
   },
   "keywords": [
     "network",
+    "speedtest",
     "speed",
     "test",
     "latency",

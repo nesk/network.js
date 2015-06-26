@@ -5,7 +5,7 @@
   "authors": [
     "Johann Pardanaud <pardanaud.j@gmail.com>"
   ],
-  "description": "Test your connection speed without Flash: only JavaScript!",
+  "description": "Make accurate network measures in JavaScript",
   "main": "dist/network.min.js",
   "moduleType": [
     "es6",
@@ -13,6 +13,7 @@
   ],
   "keywords": [
     "network",
+    "speedtest",
     "speed",
     "test",
     "latency",
