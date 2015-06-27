@@ -14,6 +14,7 @@ var argv = require('yargs').argv,
     chalk = require('chalk'),
     exorcist = require('exorcist'),
     gulp = require('gulp'),
+    npm = require('npm'),
     source = require('vinyl-source-stream');
 
 var bump = require('gulp-bump'),
@@ -104,10 +105,18 @@ gulp.task('tag', ['commit'], function(cb) {
  * Publishing tasks
  */
 
-gulp.task('publish', function(cb) {
+gulp.task('publish', ['publish-git', 'publish-npm']);
+
+gulp.task('publish-git', function(cb) {
     git.push('origin', 'master', {
         args: '--tags'
     }, cb);
+});
+
+gulp.task('publish-npm', function(cb) {
+    npm.load(function() {
+        npm.commands.publish(cb);
+    });
 });
 
 /*

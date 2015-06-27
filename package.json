@@ -36,6 +36,7 @@
     "gulp-uglify": "^1.1.0",
     "mocha": "^2.2.4",
     "mocha-phantomjs": "^3.5.3",
+    "npm": "^2.12.0",
     "phantomjs": "^1.9.16",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
