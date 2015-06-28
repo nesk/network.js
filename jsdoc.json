@@ -1,0 +1,6 @@
+{
+    "plugins": [
+        "plugins/commentsOnly",
+        "plugins/markdown"
+    ]
+}
