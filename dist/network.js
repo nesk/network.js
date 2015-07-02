@@ -25,6 +25,32 @@ var isObject = _utilsHelpers.isObject;
 var assign = _utilsHelpers.assign;
 var except = _utilsHelpers.except;
 
+/**
+ * @public
+ * @typedef {Object} Network~settingsObject
+ * @property {LatencyModule~settingsObject} latency
+ * @property {BandwidthModule~settingsObject} upload
+ * @property {BandwidthModule~settingsObject} download
+ * @example
+ * {
+ *     // Top-level properties are applied to all the modules
+ *     endpoint: './my-new-endpoint/',
+ *
+ *     // Top-level properties will be overridden by the ones specified in each module
+ *     latency: {
+ *         endpoint: './my-new-latency-endpoint/'
+ *     }
+ * }
+ */
+
+/**
+ * @class Network
+ * @param {Network~settingsObject} [settings={}] A set of custom settings.
+ * @property {LatencyModule} latency The latency module.
+ * @property {BandwidthModule} upload The upload module.
+ * @property {BandwidthModule} download The download module.
+ */
+
 var Network = (function () {
     function Network() {
         var settings = arguments[0] === undefined ? {} : arguments[0];
@@ -48,6 +74,21 @@ var Network = (function () {
 
     _createClass(Network, {
         settings: {
+
+            /**
+             * Apply a new set of custom settings.
+             * @public
+             * @method Network#settings
+             * @param {Network~settingsObject} settings A set of custom settings.
+             * @returns {Network}
+             */
+            /**
+             * Return the current set of settings.
+             * @public
+             * @method Network#settings^2
+             * @returns {Network~settingsObject}
+             */
+
             value: (function (_settings) {
                 var _settingsWrapper = function settings() {
                     return _settings.apply(this, arguments);
@@ -107,6 +148,14 @@ var Network = (function () {
             })
         },
         isRequesting: {
+
+            /**
+             * Return if a module is currently making a request.
+             * @public
+             * @method Network#isRequesting
+             * @returns {boolean} `true` if a module is requesting, otherwise `false`.
+             */
+
             value: function isRequesting() {
                 var requesting = false;
 
@@ -120,12 +169,37 @@ var Network = (function () {
             }
         },
         _registerModule: {
+
+            /**
+             * Register a new module for the current `Network` instance.
+             * @private
+             * @method Network#registerModule
+             * @param {string} name The name of the module. Will be used to create the property `Network.<name>`.
+             * @param {Network~moduleCallback} moduleCallback A callback used to initialize a module with a set of settings.
+             * @returns {Network}
+             */
+
             value: function _registerModule(name, moduleCallback) {
+                /**
+                 * A callback used to initialize a module with a set of settings.
+                 * @private
+                 * @callback Network~moduleCallback
+                 * @param {Object} settings A set of custom settings.
+                 * @returns {HttpModule} An instanciated subclass of `HttpModule`.
+                 */
                 this._modules[name] = moduleCallback;
                 return this;
             }
         },
         _initModules: {
+
+            /**
+             * Initialize all the registered modules with the settings passed to the constructor.
+             * @private
+             * @method Network#_initModules
+             * @returns {Network}
+             */
+
             value: function _initModules() {
                 var _this = this;
 
@@ -149,11 +223,20 @@ var Network = (function () {
         _exposeInternalClasses: {
 
             /**
-             * Only for testing purposes! Exposes all the internal classes to the global scope.
+             * Expose all the internal classes to the global scope. Only for testing purposes!
+             * @private
+             * @method Network._exposeInternalClasses
+             * @returns {Network}
              */
 
             value: function _exposeInternalClasses() {
-                assign(window, { EventDispatcher: EventDispatcher, HttpModule: HttpModule, LatencyModule: LatencyModule, BandwidthModule: BandwidthModule, Timing: Timing });
+                var classes = { EventDispatcher: EventDispatcher, HttpModule: HttpModule, LatencyModule: LatencyModule, BandwidthModule: BandwidthModule, Timing: Timing };
+
+                Object.keys(classes).forEach(function (name) {
+                    window[name] = classes[name];
+                });
+
+                return this;
             }
         }
     });
@@ -170,27 +253,54 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
+/**
+ * @class EventDispatcher
+ */
+
 var EventDispatcher = (function () {
+
+    /**
+     * A callback used as an event handler.
+     * @public
+     * @callback EventDispatcher~eventHandler
+     * @param {...*} args The extra parameters provided to the `trigger` method.
+     * @returns {?boolean} If `false` is explicitly returned, the `trigger` method will return `false`.
+     */
+
     function EventDispatcher() {
         _classCallCheck(this, EventDispatcher);
 
-        // Contains all the event callbacks, organized by event types.
-        this._events = {};
+        /**
+         * Contains all the event callbacks, organized by events.
+         * @private
+         * @type {Object}
+         */
+        this._eventCallbacks = {};
     }
 
     _createClass(EventDispatcher, {
         on: {
-            value: function on(eventTypes, callback) {
+
+            /**
+             * Attach a callback to one or more events.
+             * @public
+             * @method EventDispatcher#on
+             * @param {string|string[]} events One or multiple event names.
+             * @param {EventDispatcher~eventHandler} callback An event handler.
+             * @returns {EventDispatcher}
+             */
+
+            value: function on(events, callback) {
                 var _this = this;
 
-                eventTypes = Array.isArray(eventTypes) ? eventTypes : [eventTypes];
+                events = Array.isArray(events) ? events : [events];
 
-                eventTypes.forEach(function (eventType) {
-                    var events = _this._events[eventType] = _this._events[eventType] || [];
+                events.forEach(function (event) {
+                    var eventCallbacks = _this._eventCallbacks[event] = _this._eventCallbacks[event] || [];
 
                     // If the callback isn't already registered, store it.
-                    if (! ~events.indexOf(callback)) {
-                        events.push(callback);
+                    if (! ~eventCallbacks.indexOf(callback)) {
+                        eventCallbacks.push(callback);
                     }
                 });
 
@@ -198,23 +308,35 @@ var EventDispatcher = (function () {
             }
         },
         off: {
-            value: function off(eventTypes, callback) {
+
+            /**
+             * Detach a callback from one or more events.
+             * @public
+             * @method EventDispatcher#off
+             * @param {string|string[]} events One or multiple event names.
+             * @param {EventDispatcher~eventHandler} callback An event handler.
+             * @returns {EventDispatcher}
+             */
+
+            value: function off(events) {
                 var _this = this;
 
-                eventTypes = Array.isArray(eventTypes) ? eventTypes : [eventTypes];
+                var callback = arguments[1] === undefined ? null : arguments[1];
 
-                eventTypes.forEach(function (eventType) {
-                    var events = _this._events[eventType];
+                events = Array.isArray(events) ? events : [events];
 
-                    // If there is no specified callback, simply delete all the callbacks binded to the provided event type.
-                    if (callback == undefined && events) {
-                        delete _this._events[eventType];
+                events.forEach(function (event) {
+                    var eventCallbacks = _this._eventCallbacks[event];
+
+                    // If there is no specified callback, simply delete all the callbacks binded to the provided event.
+                    if (!callback && eventCallbacks) {
+                        delete _this._eventCallbacks[event];
                     } else {
-                        var eventIndex = events ? events.indexOf(callback) : -1;
+                        var callbackIndex = eventCallbacks ? eventCallbacks.indexOf(callback) : -1;
 
                         // If the callback is registered, remove it from the array.
-                        if (~eventIndex) {
-                            events.splice(eventIndex, 1);
+                        if (callbackIndex != -1) {
+                            eventCallbacks.splice(callbackIndex, 1);
                         }
                     }
                 });
@@ -223,22 +345,32 @@ var EventDispatcher = (function () {
             }
         },
         trigger: {
-            value: function trigger(eventType) {
+
+            /**
+             * Trigger an event.
+             * @public
+             * @method EventDispatcher#trigger
+             * @param {string} event An event name.
+             * @param {...*} extraParameters Some extra parameters to pass to the event handlers.
+             * @returns {boolean} Returns `false` if one of the event handlers explicitly returned `false`.
+             */
+
+            value: function trigger(event) {
                 for (var _len = arguments.length, extraParameters = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
                     extraParameters[_key - 1] = arguments[_key];
                 }
 
-                var events = this._events[eventType] || [];
+                var eventCallbacks = this._eventCallbacks[event] || [];
 
                 // A callback can return a boolean value which will be logically compared to the other callbacks values before
                 // being returned by the trigger() method. This allows a callback to send a "signal" to the caller, like
                 // cancelling an action.
                 var returnValue = true;
 
-                events.forEach(function (callback) {
+                eventCallbacks.forEach(function (eventCallback) {
                     // A callback must explicitly return false if it wants the trigger() method to return false, undefined will
                     // not work. This avoids crappy callbacks to mess up with the triggering system.
-                    var value = callback.apply(undefined, extraParameters);
+                    var value = eventCallback.apply(undefined, extraParameters);
                     value = value !== false ? true : false;
 
                     returnValue = returnValue && value; // Compare the result of the callback to the actual return value
@@ -273,6 +405,36 @@ var Timing = _interopRequire(require("../Timing"));
 
 var defer = require("../../utils/helpers").defer;
 
+/**
+ * @public
+ * @typedef {Object} BandwidthModule~settingsObject
+ * @extends HttpModule~settingsObject
+ * @property {Object} data
+ * @property {number} data.size The amount of data to initially use.
+ * @property {number} [data.multiplier=2] If the measure period can't reach the delay defined in the settings, the data amount is multiplied by the following value.
+ */
+
+/**
+ * Apply a new set of custom settings.
+ * @public
+ * @method BandwidthModule#settings
+ * @param {BandwidthModule~settingsObject} settings A set of custom settings.
+ * @returns {BandwidthModule}
+ */
+/**
+ * Return the current set of settings.
+ * @public
+ * @method BandwidthModule#settings^2
+ * @returns {BandwidthModule~settingsObject}
+ */
+
+/**
+ * @class BandwidthModule
+ * @extends HttpModule
+ * @param {string} loadingType The loading type, `upload` or `download`.
+ * @param {BandwidthModule~settingsObject} [settings={}] A set of custom settings.
+ */
+
 var BandwidthModule = (function (_HttpModule) {
     function BandwidthModule(loadingType) {
         var _this = this;
@@ -283,7 +445,7 @@ var BandwidthModule = (function (_HttpModule) {
 
         loadingType = ~["upload", "download"].indexOf(loadingType) ? loadingType : "download";
 
-        this._enhanceDefaultSettings({
+        this._extendDefaultSettings({
             data: {
                 // 2 MB for upload, 10 MB for download
                 size: loadingType == "upload" ? 2 * 1024 * 1024 : 10 * 1024 * 1024,
@@ -346,6 +508,14 @@ var BandwidthModule = (function (_HttpModule) {
 
     _createClass(BandwidthModule, {
         start: {
+
+            /**
+             * Start requesting the server to make measures.
+             * @public
+             * @method BandwidthModule#start
+             * @returns {BandwidthModule}
+             */
+
             value: function start() {
                 var loadingType = this._loadingType,
                     dataSettings = this.settings().data,
@@ -382,15 +552,34 @@ var BandwidthModule = (function (_HttpModule) {
                 this._newRequest(type, {
                     size: dataSettings.size
                 })._sendRequest(blob);
+
+                return this;
             }
         },
         abort: {
+
+            /**
+             * Abort the measures.
+             * @public
+             * @method BandwidthModule#abort
+             * @returns {BandwidthModule}
+             */
+
             value: function abort() {
                 this._intendedEnd = true;
                 return this._abort();
             }
         },
         _progress: {
+
+            /**
+             * Make bandwidth measures for the current request.
+             * @private
+             * @method BandwidthModule#_progress
+             * @param {ProgressEvent} event The event associated with the progress event of the current request.
+             * @returns {BandwidthModule}
+             */
+
             value: function _progress(event) {
                 var _this = this;
 
@@ -435,14 +624,33 @@ var BandwidthModule = (function (_HttpModule) {
 
                     _this.trigger("progress", avgSpeed, instantSpeed);
                 });
+
+                return this;
             }
         },
         _timeout: {
+
+            /**
+             * Mark the current request as entirely finished (this means it ended after a time out).
+             * @private
+             * @method BandwidthModule#_timeout
+             * @returns {BandwidthModule}
+             */
+
             value: function _timeout() {
                 this._intendedEnd = true;
+                return this;
             }
         },
         _end: {
+
+            /**
+             * End the measures.
+             * @private
+             * @method BandwidthModule#_end
+             * @returns {BandwidthModule}
+             */
+
             value: function _end() {
                 // A timeout or an abort occured, bypass the further requests and trigger the "end" event.
                 if (this._intendedEnd) {
@@ -462,6 +670,8 @@ var BandwidthModule = (function (_HttpModule) {
                     this._isRestarting = true;
                     this.start();
                 }
+
+                return this;
             }
         }
     });
@@ -494,6 +704,20 @@ var isObject = _utilsHelpers.isObject;
 var assign = _utilsHelpers.assign;
 var assignStrict = _utilsHelpers.assignStrict;
 
+/**
+ * @public
+ * @typedef {Object} HttpModule~settingsObject
+ * @property {string} [endpoint=./network.php] Where is located your `network.php` file.
+ * @property {number} [delay=8000] The delay while you want to take measures.
+ */
+
+/**
+ * @class HttpModule
+ * @extends EventDispatcher
+ * @param {string} moduleName The name of the instanciated module.
+ * @param {HttpModule~settingsObject} [settings={}] A set of custom settings.
+ */
+
 var HttpModule = (function (_EventDispatcher) {
     function HttpModule(moduleName) {
         var _this = this;
@@ -504,7 +728,7 @@ var HttpModule = (function (_EventDispatcher) {
 
         _get(Object.getPrototypeOf(HttpModule.prototype), "constructor", this).call(this);
 
-        this._enhanceDefaultSettings({
+        this._extendDefaultSettings({
             endpoint: "./network.php",
             delay: 8000
         });
@@ -537,6 +761,21 @@ var HttpModule = (function (_EventDispatcher) {
 
     _createClass(HttpModule, {
         settings: {
+
+            /**
+             * Apply a new set of custom settings.
+             * @public
+             * @method HttpModule#settings
+             * @param {HttpModule~settingsObject} settings A set of custom settings.
+             * @returns {HttpModule}
+             */
+            /**
+             * Return the current set of settings.
+             * @public
+             * @method HttpModule#settings^2
+             * @returns {HttpModule~settingsObject}
+             */
+
             value: (function (_settings) {
                 var _settingsWrapper = function settings() {
                     return _settings.apply(this, arguments);
@@ -559,16 +798,44 @@ var HttpModule = (function (_EventDispatcher) {
             })
         },
         isRequesting: {
+
+            /**
+             * Return if the module is currently making a request.
+             * @public
+             * @method HttpModule#isRequesting
+             * @returns {boolean} `true` if the module is requesting, otherwise `false`.
+             */
+
             value: function isRequesting() {
                 return this._requesting;
             }
         },
-        _enhanceDefaultSettings: {
-            value: function _enhanceDefaultSettings(settings) {
+        _extendDefaultSettings: {
+
+            /**
+             * Extend the set of default settings.
+             * @protected
+             * @method HttpModule#_extendDefaultSettings
+             * @param {Object} settings The new properties to add to the default settings.
+             * @returns {HttpModule}
+             */
+
+            value: function _extendDefaultSettings(settings) {
                 this._defaultSettings = assign(this._defaultSettings || {}, settings);
+                return this;
             }
         },
         _newRequest: {
+
+            /**
+             * Create a new XHR request.
+             * @protected
+             * @method HttpModule#_newRequest
+             * @param {string} httpMethod The HTTP method to use with the request, GET or POST.
+             * @param {Object} queryParams The query parameters to use with the request.
+             * @returns {HttpModule}
+             */
+
             value: function _newRequest(httpMethod, queryParams) {
                 // Check if a callback binded to the "_newRequest" event returns false, if it's the case, cancel the request
                 // creation. If the requesting status has been overridden, there's no need to cancel the request since the user
@@ -646,17 +913,36 @@ var HttpModule = (function (_EventDispatcher) {
             }
         },
         _sendRequest: {
-            value: function _sendRequest(data) {
+
+            /**
+             * Send a newly created XHR request.
+             * @protected
+             * @method HttpModule#_sendRequest
+             * @param {?*} [data=null] The data to send with the request.
+             * @returns {HttpModule}
+             */
+
+            value: function _sendRequest() {
+                var data = arguments[0] === undefined ? null : arguments[0];
+
                 if (this._xhr && this._xhr.readyState == XMLHttpRequest.OPENED) {
-                    this._xhr.send(typeof data != "undefined" ? data : null);
+                    this._xhr.send(data);
                 } else {
-                    console.warn("A request must have been created before it can be sent.");
+                    console.warn("A request must have been created before sending any data.");
                 }
 
                 return this;
             }
         },
         _abort: {
+
+            /**
+             * Abort the current request.
+             * @protected
+             * @method HttpModule#_abort
+             * @returns {HttpModule}
+             */
+
             value: function _abort() {
                 if (this._xhr) {
                     this._xhr.abort();
@@ -666,6 +952,15 @@ var HttpModule = (function (_EventDispatcher) {
             }
         },
         _getTimingEntry: {
+
+            /**
+             * Get the Resource Timing entry associated to the current request.
+             * @protected
+             * @method HttpModule#_getTimingEntry
+             * @param {HttpModule~timingCallback} callback A callback used to send back the timing entry.
+             * @returns {HttpModule}
+             */
+
             value: function _getTimingEntry(callback) {
                 // The Resource Timing entries aren't immediately available once the 'load' event is triggered by an
                 // XMLHttpRequest, we must wait for another process tick to check for a refreshed list.
@@ -676,8 +971,13 @@ var HttpModule = (function (_EventDispatcher) {
                             return ~entry.name.indexOf(lastURLToken);
                         });
 
-                        // Return the entry through the callback
-                        typeof callback == "function" && callback(entries.length ? entries[0] : null);
+                        /**
+                         * A callback used to send back the timing entry.
+                         * @private
+                         * @callback HttpModule~timingCallback
+                         * @param {PerformanceResourceTiming} entry The Resource Timing entry associated to the current request.
+                         */
+                        callback(entries.length ? entries[0] : null);
                     };
                 })(this._lastURLToken), 0);
 
@@ -685,9 +985,19 @@ var HttpModule = (function (_EventDispatcher) {
             }
         },
         _setRequesting: {
-            value: function _setRequesting(value) {
+
+            /**
+             * Override the requesting status of the module.
+             * @protected
+             * @method HttpModule#_setRequesting
+             * @param {boolean} isRequesting The requesting status.
+             * @returns {HttpModule}
+             */
+
+            value: function _setRequesting(isRequesting) {
                 this._requestingOverridden = true;
-                this._requesting = value;
+                this._requesting = isRequesting;
+                return this;
             }
         }
     });
@@ -720,6 +1030,20 @@ var isObject = _utilsHelpers.isObject;
 var assignStrict = _utilsHelpers.assignStrict;
 var except = _utilsHelpers.except;
 
+/**
+ * @public
+ * @typedef {Object} LatencyModule~settingsObject
+ * @property {string} [endpoint=./network.php] Where is located your `network.php` file.
+ * @property {number} [measures=5] How many measures should be returned.
+ * @property {number} [attempts=3] How much attempts to get a valid value should be done for each measure.
+ */
+
+/**
+ * @class LatencyModule
+ * @extends HttpModule
+ * @param {LatencyModule~settingsObject} [settings={}] A set of custom settings.
+ */
+
 var LatencyModule = (function (_HttpModule) {
     function LatencyModule() {
         var _this = this;
@@ -728,7 +1052,7 @@ var LatencyModule = (function (_HttpModule) {
 
         _classCallCheck(this, LatencyModule);
 
-        this._enhanceDefaultSettings({
+        this._extendDefaultSettings({
             measures: 5,
             attempts: 3
         });
@@ -777,6 +1101,21 @@ var LatencyModule = (function (_HttpModule) {
 
     _createClass(LatencyModule, {
         settings: {
+
+            /**
+             * Apply a new set of custom settings.
+             * @public
+             * @method LatencyModule#settings
+             * @param {LatencyModule~settingsObject} settings A set of custom settings.
+             * @returns {LatencyModule}
+             */
+            /**
+             * Return the current set of settings.
+             * @public
+             * @method LatencyModule#settings^2
+             * @returns {LatencyModule~settingsObject}
+             */
+
             value: (function (_settings) {
                 var _settingsWrapper = function settings() {
                     return _settings.apply(this, arguments);
@@ -800,6 +1139,14 @@ var LatencyModule = (function (_HttpModule) {
             })
         },
         start: {
+
+            /**
+             * Start requesting the server to make measures.
+             * @public
+             * @method LatencyModule#start
+             * @returns {LatencyModule}
+             */
+
             value: function start() {
                 // Set the number of requests required to establish the network latency. If the browser doesn't support the
                 // Resource Timing API, add a request that will be ignored to avoid a longer request due to a possible
@@ -828,6 +1175,15 @@ var LatencyModule = (function (_HttpModule) {
             }
         },
         _nextRequest: {
+
+            /**
+             * Initiate the next request used for latency measures.
+             * @private
+             * @method LatencyModule#_nextRequest
+             * @param {boolean} [retry=false] Defines if the next request is a retry due to a failing request or not.
+             * @returns {LatencyModule}
+             */
+
             value: function _nextRequest() {
                 var _this = this;
 
@@ -856,9 +1212,20 @@ var LatencyModule = (function (_HttpModule) {
                         return _this._end();
                     }, 0);
                 }
+
+                return this;
             }
         },
         _measure: {
+
+            /**
+             * Make latency measures for the last request.
+             * @private
+             * @method LatencyModule#_measure
+             * @param {?XMLHttpRequest} [xhr=null] The concerned XMLHttpRequest if the browser doesn't support the Resource Timing API.
+             * @returns {LatencyModule}
+             */
+
             value: function _measure() {
                 var _this = this;
 
@@ -898,9 +1265,19 @@ var LatencyModule = (function (_HttpModule) {
                 else {
                     this._nextRequest();
                 }
+
+                return this;
             }
         },
         _end: {
+
+            /**
+             * End the measures.
+             * @private
+             * @method LatencyModule#_end
+             * @returns {LatencyModule}
+             */
+
             value: function _end() {
                 var latencies = this._latencies;
 
@@ -922,6 +1299,8 @@ var LatencyModule = (function (_HttpModule) {
 
                 // Trigger the "end" event with the average latency and the latency list as parameters
                 this.trigger("end", avgLatency, latencies);
+
+                return this;
             }
         }
     });
@@ -937,6 +1316,11 @@ module.exports = LatencyModule;
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+/**
+ * @private
+ * @class Timing
+ */
 
 var Timing = (function () {
     function Timing() {
@@ -955,6 +1339,15 @@ var Timing = (function () {
 
     _createClass(Timing, {
         mark: {
+
+            /**
+             * Create a new timing mark.
+             * @public
+             * @method Timing#mark
+             * @param {string} label A label associated to the mark.
+             * @returns {Timing}
+             */
+
             value: function mark(label) {
                 var support = this._support,
                     marks = this._marks;
@@ -971,6 +1364,17 @@ var Timing = (function () {
             }
         },
         measure: {
+
+            /**
+             * Measure the delay between two marks.
+             * @public
+             * @method Timing#measure
+             * @param {string} measureLabel A label associated to the measure.
+             * @param {string} markLabelA The label of the first mark.
+             * @param {string} markLabelB The label of the second mark.
+             * @returns {number} The measured value.
+             */
+
             value: function measure(measureLabel, markLabelA, markLabelB) {
                 var support = this._support,
                     marks = this._marks,
@@ -989,6 +1393,14 @@ var Timing = (function () {
             }
         },
         supportsResourceTiming: {
+
+            /**
+             * Determine if the current browser supports the Resource Timing API.
+             * @public
+             * @method Timing#supportsResourceTiming
+             * @returns {boolean} `true` if the Resource Timing API is supported, otherwise `false`.
+             */
+
             value: function supportsResourceTiming() {
                 return this._support.resourceTiming;
             }
@@ -1007,11 +1419,61 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
+/**
+ * Determine if the provided value is an object.
+ * @private
+ * @function isObject
+ * @param {*} obj The value to check.
+ * @returns {boolean} `true` if the value is an object, otherwise `false`.
+ */
 exports.isObject = isObject;
+
+/**
+ * Make a deep copy of any value.
+ * @private
+ * @function copy
+ * @param {*} value The value to copy.
+ * @returns {*} The copied value.
+ */
 exports.copy = copy;
+
+/**
+ * Copy all the properties in the source objects over to the destination object.
+ * @private
+ * @function assign
+ * @param {Object} [target={}] The destination object.
+ * @param {...Object} sources The source objects.
+ * @returns {Object} The destination object once the properties are copied.
+ */
 exports.assign = assign;
+
+/**
+ * Copy the properties (but no new ones) in the source objects over to the destination object.
+ * @private
+ * @function assignStrict
+ * @param {Object} [target={}] The destination object.
+ * @param {...Object} sources The source objects.
+ * @returns {Object} The destination object once the properties are copied.
+ */
 exports.assignStrict = assignStrict;
+
+/**
+ * Get a copy of an object without some of its properties.
+ * @private
+ * @function except
+ * @param {Object} obj The original object.
+ * @param {string[]} properties The properties to exclude from the copied object.
+ * @returns {Object} The copied object without the specified properties.
+ */
 exports.except = except;
+
+/**
+ * Defer the execution of a function.
+ * @private
+ * @function defer
+ * @param {Function} func The function to defer.
+ * @returns {Defer} The Defer object used to execute the function when needed.
+ */
 exports.defer = defer;
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -1025,26 +1487,35 @@ function copy(value) {
     return JSON.parse(JSON.stringify(value));
 }
 
-function _assign() {
+/**
+ * Copy the properties in the source objects over to the destination object.
+ * @private
+ * @function _assign
+ * @param {boolean} strict Given `true`, new properties will not be copied.
+ * @param {Object} [target={}] The destination object.
+ * @param {...Object} sources The source objects.
+ * @returns {Object} The destination object once the properties are copied.
+ */
+function _assign(strict) {
     for (var _len = arguments.length, sources = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
         sources[_key - 2] = arguments[_key];
     }
 
-    var strict = arguments[0] === undefined ? false : arguments[0];
     var target = arguments[1] === undefined ? {} : arguments[1];
+
+    target = copy(target);
 
     sources.forEach(function (source) {
         Object.keys(source).forEach(function (key) {
             if (!strict || target.hasOwnProperty(key)) {
                 var value = source[key];
-                target[key] = isObject(value) ? assign(target[key], value) : value;
+                target[key] = isObject(value) ? _assign(strict, target[key], value) : value;
             }
         });
     });
 
     return target;
 }
-
 function assign() {
     for (var _len = arguments.length, sources = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
         sources[_key - 1] = arguments[_key];
@@ -1065,10 +1536,10 @@ function assignStrict() {
     return _assign.apply(undefined, [true, target].concat(sources));
 }
 
-function except(obj, indexes) {
+function except(obj, properties) {
     var objCopy = copy(obj);
 
-    indexes.forEach(function (index) {
+    properties.forEach(function (index) {
         return delete objCopy[index];
     });
 
@@ -1076,20 +1547,31 @@ function except(obj, indexes) {
 }
 
 function defer() {
-    var cb = arguments[0] === undefined ? function () {} : arguments[0];
+    var func = arguments[0] === undefined ? function () {} : arguments[0];
 
+    /**
+     * @private
+     * @class Defer
+     */
     return new ((function () {
         var _class = function () {
             _classCallCheck(this, _class);
 
-            this.cb = cb;
+            this.func = func;
         };
 
         _createClass(_class, {
             run: {
+
+                /**
+                 * Execute the deferred function.
+                 * @public
+                 * @method Defer#run
+                 */
+
                 value: function run() {
-                    if (this.cb) this.cb();
-                    delete this.cb;
+                    if (this.func) this.func();
+                    delete this.func;
                 }
             }
         });
