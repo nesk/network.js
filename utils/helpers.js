@@ -1,4 +1,25 @@
 /**
+ * Return the global object.
+ * @private
+ * @function getGlobalObject
+ * @return {Object}
+ * @see https://gist.github.com/rauschma/1bff02da66472f555c75
+ */
+export function getGlobalObject() {
+    // Workers don’t have `window`, only `self`.
+    if (typeof self !== 'undefined') {
+        return self;
+    }
+
+    if (typeof global !== 'undefined') {
+        return global;
+    }
+
+    // Not all environments allow `eval` and `Function`, use only as a last resort.
+    return new Function('return this')();
+}
+
+/**
  * Determine if the provided value is an object.
  * @private
  * @function isObject
