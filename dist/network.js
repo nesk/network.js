@@ -21,6 +21,7 @@ var Timing = _interopRequire(require("./Timing"));
 
 var _utilsHelpers = require("../utils/helpers");
 
+var getGlobalObject = _utilsHelpers.getGlobalObject;
 var isObject = _utilsHelpers.isObject;
 var assign = _utilsHelpers.assign;
 var except = _utilsHelpers.except;
@@ -46,9 +47,9 @@ var except = _utilsHelpers.except;
 /**
  * @class Network
  * @param {Network~settingsObject} [settings={}] A set of custom settings.
- * @property {LatencyModule} latency The latency module.
- * @property {BandwidthModule} upload The upload module.
- * @property {BandwidthModule} download The download module.
+ * @member {LatencyModule} latency The latency module.
+ * @member {BandwidthModule} upload The upload module.
+ * @member {BandwidthModule} download The download module.
  */
 
 var Network = (function () {
@@ -230,10 +231,11 @@ var Network = (function () {
              */
 
             value: function _exposeInternalClasses() {
-                var classes = { EventDispatcher: EventDispatcher, HttpModule: HttpModule, LatencyModule: LatencyModule, BandwidthModule: BandwidthModule, Timing: Timing };
+                var global = getGlobalObject(),
+                    classes = { EventDispatcher: EventDispatcher, HttpModule: HttpModule, LatencyModule: LatencyModule, BandwidthModule: BandwidthModule, Timing: Timing };
 
                 Object.keys(classes).forEach(function (name) {
-                    window[name] = classes[name];
+                    global[name] = classes[name];
                 });
 
                 return this;
@@ -1317,6 +1319,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 
+var getGlobalObject = require("../utils/helpers").getGlobalObject;
+
 /**
  * @private
  * @class Timing
@@ -1326,15 +1330,35 @@ var Timing = (function () {
     function Timing() {
         _classCallCheck(this, Timing);
 
-        this._marks = {};
-        this._measures = {};
+        var global = getGlobalObject();
 
-        // Does the browser support the following APIs?
+        /**
+         * Defines if the current browser supports some specific Timing APIs.
+         * @private
+         * @member {Object} _support
+         * @property {boolean} performance `true` if the Performance API is available.
+         * @property {boolean} userTiming `true` if the User Timing API is available.
+         * @property {boolean} resourceTiming `true` if the Resource Timing API is available.
+         */
         this._support = {
-            performance: !!window.performance,
-            userTiming: window.performance && performance.mark,
-            resourceTiming: window.performance && typeof performance.getEntriesByType == "function" && performance.timing
+            performance: !!global.performance,
+            userTiming: global.performance && performance.mark,
+            resourceTiming: global.performance && typeof performance.getEntriesByType == "function" && performance.timing
         };
+
+        /**
+         * Contains all the marks created by the `mark` method.
+         * @private
+         * @member {Object} _marks
+         */
+        this._marks = {};
+
+        /**
+         * Contains all the measures created by the `measure` method.
+         * @private
+         * @member {Object} _measures
+         */
+        this._measures = {};
     }
 
     _createClass(Timing, {
@@ -1354,7 +1378,9 @@ var Timing = (function () {
 
                 if (support.userTiming) {
                     performance.mark(label);
-                } else if (support.performance) {
+                }
+
+                if (support.performance) {
                     marks[label] = performance.now();
                 } else {
                     marks[label] = new Date().getTime();
@@ -1381,11 +1407,17 @@ var Timing = (function () {
                     measures = this._measures;
 
                 if (typeof measures[measureLabel] == "undefined") {
+                    var measureWithoutUserTiming = marks[markLabelB] - marks[markLabelA];
+
                     if (support.userTiming) {
                         performance.measure(measureLabel, markLabelA, markLabelB);
-                        measures[measureLabel] = performance.getEntriesByName(measureLabel)[0].duration;
+                        var entriesByName = performance.getEntriesByName(measureLabel);
+
+                        // The performance API could return no corresponding entries in Firefox so we must use a fallback.
+                        // See: https://github.com/nesk/network.js/issues/32#issuecomment-118434305
+                        measures[measureLabel] = entriesByName.length ? entriesByName[0].duration : measureWithoutUserTiming;
                     } else {
-                        measures[measureLabel] = marks[markLabelB] - marks[markLabelA];
+                        measures[measureLabel] = measureWithoutUserTiming;
                     }
                 }
 
@@ -1412,12 +1444,22 @@ var Timing = (function () {
 
 module.exports = new Timing();
 
-},{}],7:[function(require,module,exports){
+},{"../utils/helpers":7}],7:[function(require,module,exports){
+(function (global){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+/**
+ * Return the global object.
+ * @private
+ * @function getGlobalObject
+ * @return {Object}
+ * @see https://gist.github.com/rauschma/1bff02da66472f555c75
+ */
+exports.getGlobalObject = getGlobalObject;
 
 /**
  * Determine if the provided value is an object.
@@ -1478,6 +1520,20 @@ exports.defer = defer;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+function getGlobalObject() {
+    // Workers don’t have `window`, only `self`.
+    if (typeof self !== "undefined") {
+        return self;
+    }
+
+    if (typeof global !== "undefined") {
+        return global;
+    }
+
+    // Not all environments allow `eval` and `Function`, use only as a last resort.
+    return new Function("return this")();
+}
 
 function isObject(obj) {
     return obj != undefined && obj != null && typeof obj.valueOf() == "object";
@@ -1579,6 +1635,8 @@ function defer() {
         return _class;
     })())();
 }
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
 },{}]},{},[1])(1)
 });
