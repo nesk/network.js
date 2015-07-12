@@ -59,7 +59,9 @@ gulp.task('default', function() {
         standalone: 'Network',
         debug: true
     })
-        .transform(babelify)
+        .transform(babelify.configure({
+            optional: ['es7.classProperties', 'es7.decorators']
+        }))
         .bundle().on('error', error)
         .pipe(exorcist(path.join(paths.dest, names.base + '.map')))
         .pipe(source(names.base))
