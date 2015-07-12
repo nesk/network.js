@@ -1,13 +1,13 @@
 # Network.js [![Build Status](https://travis-ci.org/nesk/network.js.svg?branch=master)](https://travis-ci.org/nesk/network.js)
 
-A __JavaScript__ library to measure various aspects of a connection. It can accurately estimate a bandwidth/latency between a client (using a web browser) and a server (running a specific script).
+A __JavaScript__ library, entirely written in ES6, to measure various aspects of a connection. It can accurately estimate a bandwidth/latency between a client (using a web browser) and a server (running a specific script).
 
 ## Installation
 
 User Bower or [download a ZIP file](https://github.com/nesk/network.js/archive/master.zip):
 
 ```shell
-bower install --save network-js
+bower install network-js
 ```
 
 ```html
