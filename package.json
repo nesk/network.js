@@ -37,7 +37,7 @@
     "mocha": "^2.2.5",
     "mocha-phantomjs": "^3.5.3",
     "npm": "^2.12.1",
-    "phantomjs": "^1.9.17",
+    "phantomjs": "1.9.1 - 1.9.7-15",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "yargs": "^3.15.0"
