@@ -1,40 +1,41 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Network = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/**
- * @class EventDispatcher
- */
-"use strict";
+'use strict';
 
-Object.defineProperty(exports, "__esModule", {
+Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createDecoratedClass = (function () { function defineProperties(target, descriptors, initializers) { for (var i = 0; i < descriptors.length; i++) { var descriptor = descriptors[i]; var decorators = descriptor.decorators; var key = descriptor.key; delete descriptor.key; delete descriptor.decorators; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor || descriptor.initializer) descriptor.writable = true; if (decorators) { for (var f = 0; f < decorators.length; f++) { var decorator = decorators[f]; if (typeof decorator === 'function') { descriptor = decorator(target, key, descriptor) || descriptor; } else { throw new TypeError('The decorator for method ' + descriptor.key + ' is of the invalid type ' + typeof decorator); } } if (descriptor.initializer !== undefined) { initializers[key] = descriptor; continue; } } Object.defineProperty(target, key, descriptor); } } return function (Constructor, protoProps, staticProps, protoInitializers, staticInitializers) { if (protoProps) defineProperties(Constructor.prototype, protoProps, protoInitializers); if (staticProps) defineProperties(Constructor, staticProps, staticInitializers); return Constructor; }; })();
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _defineDecoratedPropertyDescriptor(target, key, descriptors) { var _descriptor = descriptors[key]; if (!_descriptor) return; var descriptor = {}; for (var _key in _descriptor) descriptor[_key] = _descriptor[_key]; descriptor.value = descriptor.initializer.call(target); Object.defineProperty(target, key, descriptor); }
+
+var _utilsDecorators = require('../utils/decorators');
+
+/**
+ * A callback used as an event handler.
+ * @public
+ * @callback EventDispatcher~eventHandler
+ * @param {...*} args The extra parameters provided to the `trigger` method.
+ * @returns {?boolean} If `false` is explicitly returned, the `trigger` method will return `false`.
+ */
+
+/**
+ * @class EventDispatcher
+ */
 
 var EventDispatcher = (function () {
-
-    /**
-     * A callback used as an event handler.
-     * @public
-     * @callback EventDispatcher~eventHandler
-     * @param {...*} args The extra parameters provided to the `trigger` method.
-     * @returns {?boolean} If `false` is explicitly returned, the `trigger` method will return `false`.
-     */
+    var _instanceInitializers = {};
 
     function EventDispatcher() {
         _classCallCheck(this, EventDispatcher);
 
-        /**
-         * Contains all the event callbacks, organized by events.
-         * @private
-         * @type {Object}
-         */
-        this._eventCallbacks = {};
+        _defineDecoratedPropertyDescriptor(this, '_eventCallbacks', _instanceInitializers);
     }
 
-    _createClass(EventDispatcher, [{
-        key: "on",
+    _createDecoratedClass(EventDispatcher, [{
+        key: 'on',
 
         /**
          * Attach a callback to one or more events.
@@ -60,8 +61,6 @@ var EventDispatcher = (function () {
 
             return this;
         }
-    }, {
-        key: "off",
 
         /**
          * Detach a callback from one or more events.
@@ -71,10 +70,12 @@ var EventDispatcher = (function () {
          * @param {EventDispatcher~eventHandler} callback An event handler.
          * @returns {EventDispatcher}
          */
+    }, {
+        key: 'off',
         value: function off(events) {
             var _this2 = this;
 
-            var callback = arguments[1] === undefined ? null : arguments[1];
+            var callback = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
             events = Array.isArray(events) ? events : [events];
 
@@ -96,8 +97,6 @@ var EventDispatcher = (function () {
 
             return this;
         }
-    }, {
-        key: "trigger",
 
         /**
          * Trigger an event.
@@ -107,9 +106,11 @@ var EventDispatcher = (function () {
          * @param {...*} extraParameters Some extra parameters to pass to the event handlers.
          * @returns {boolean} Returns `false` if one of the event handlers explicitly returned `false`.
          */
+    }, {
+        key: 'trigger',
         value: function trigger(event) {
-            for (var _len = arguments.length, extraParameters = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-                extraParameters[_key - 1] = arguments[_key];
+            for (var _len = arguments.length, extraParameters = Array(_len > 1 ? _len - 1 : 0), _key2 = 1; _key2 < _len; _key2++) {
+                extraParameters[_key2 - 1] = arguments[_key2];
             }
 
             var eventCallbacks = this._eventCallbacks[event] || [];
@@ -130,22 +131,35 @@ var EventDispatcher = (function () {
 
             return returnValue;
         }
-    }]);
+    }, {
+        key: '_eventCallbacks',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return {};
+        },
+        enumerable: true
+    }], null, _instanceInitializers);
 
     return EventDispatcher;
 })();
 
-exports["default"] = EventDispatcher;
-module.exports = exports["default"];
+exports['default'] = EventDispatcher;
+module.exports = exports['default'];
 
-},{}],2:[function(require,module,exports){
+/**
+ * All the registered event callbacks, organized by events.
+ * @private
+ * @member {Object} EventDispatcher#_eventCallbacks
+ */
+
+},{"../utils/decorators":7}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createDecoratedClass = (function () { function defineProperties(target, descriptors, initializers) { for (var i = 0; i < descriptors.length; i++) { var descriptor = descriptors[i]; var decorators = descriptor.decorators; var key = descriptor.key; delete descriptor.key; delete descriptor.decorators; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor || descriptor.initializer) descriptor.writable = true; if (decorators) { for (var f = 0; f < decorators.length; f++) { var decorator = decorators[f]; if (typeof decorator === 'function') { descriptor = decorator(target, key, descriptor) || descriptor; } else { throw new TypeError('The decorator for method ' + descriptor.key + ' is of the invalid type ' + typeof decorator); } } if (descriptor.initializer !== undefined) { initializers[key] = descriptor; continue; } } Object.defineProperty(target, key, descriptor); } } return function (Constructor, protoProps, staticProps, protoInitializers, staticInitializers) { if (protoProps) defineProperties(Constructor.prototype, protoProps, protoInitializers); if (staticProps) defineProperties(Constructor, staticProps, staticInitializers); return Constructor; }; })();
 
 var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
@@ -153,7 +167,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _defineDecoratedPropertyDescriptor(target, key, descriptors) { var _descriptor = descriptors[key]; if (!_descriptor) return; var descriptor = {}; for (var _key in _descriptor) descriptor[_key] = _descriptor[_key]; descriptor.value = descriptor.initializer.call(target); Object.defineProperty(target, key, descriptor); }
 
 var _HttpModule2 = require('./HttpModule');
 
@@ -164,6 +180,8 @@ var _Timing = require('../Timing');
 var _Timing2 = _interopRequireDefault(_Timing);
 
 var _utilsHelpers = require('../../utils/helpers');
+
+var _utilsDecorators = require('../../utils/decorators');
 
 /**
  * @public
@@ -196,16 +214,205 @@ var _utilsHelpers = require('../../utils/helpers');
  */
 
 var BandwidthModule = (function (_HttpModule) {
+    var _instanceInitializers = {};
+    var _instanceInitializers = {};
+
+    _inherits(BandwidthModule, _HttpModule);
+
+    _createDecoratedClass(BandwidthModule, [{
+        key: '_loadingType',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return undefined;
+        },
+
+        /**
+         *
+         * @private
+         * @member {boolean} BandwidthModule#_intendedEnd
+         */
+        enumerable: true
+    }, {
+        key: '_intendedEnd',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return false;
+        },
+
+        /**
+         *
+         * @private
+         * @member {boolean} BandwidthModule#_isRestarting
+         */
+        enumerable: true
+    }, {
+        key: '_isRestarting',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return false;
+        },
+
+        /**
+         * Tracks the value of the `loaded` property for each progress event.
+         * @private
+         * @member {?number} BandwidthModule#_lastLoadedValue
+         */
+        enumerable: true
+    }, {
+        key: '_lastLoadedValue',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return null;
+        },
+
+        /**
+         * The recorded measures of speed.
+         * @private
+         * @member {number[]} BandwidthModule#_speedRecords
+         */
+        enumerable: true
+    }, {
+        key: '_speedRecords',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return [];
+        },
+
+        /**
+         * The average speed.
+         * @private
+         * @member {number} BandwidthModule#_avgSpeed
+         */
+        enumerable: true
+    }, {
+        key: '_avgSpeed',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return undefined;
+        },
+
+        /**
+         * The ID of the current request.
+         * @private
+         * @member {number} BandwidthModule#_requestID
+         */
+        enumerable: true
+    }, {
+        key: '_requestID',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return 0;
+        },
+
+        /**
+         * The ID of the current progress event.
+         * @private
+         * @member {number} BandwidthModule#_progressID
+         */
+        enumerable: true
+    }, {
+        key: '_progressID',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return 0;
+        },
+
+        /**
+         * Defines if measures have started.
+         * @private
+         * @member {boolean} BandwidthModule#_started
+         */
+        enumerable: true
+    }, {
+        key: '_started',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return false;
+        },
+
+        /**
+         * Defines if the current progress event is the first one triggered for the current request.
+         * @private
+         * @member {boolean} BandwidthModule#_firstProgress
+         */
+        enumerable: true
+    }, {
+        key: '_firstProgress',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return true;
+        },
+
+        /**
+         * @private
+         * @member {Defer} BandwidthModule#_deferredProgress
+         */
+        enumerable: true
+    }, {
+        key: '_deferredProgress',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return undefined;
+        },
+
+        /**
+         * Unique labels for each request, exclusively used to make measures.
+         * @private
+         * @member {Object} BandwidthModule#_timingLabels
+         * @property {?string} start
+         * @property {?string} progress
+         * @property {?string} end
+         * @property {?string} measure
+         */
+        enumerable: true
+    }, {
+        key: '_timingLabels',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return {
+                start: null,
+                progress: null,
+                end: null,
+                measure: null
+            };
+        },
+        enumerable: true
+    }], null, _instanceInitializers);
+
     function BandwidthModule(loadingType) {
         var _this = this;
 
-        var settings = arguments[1] === undefined ? {} : arguments[1];
+        var settings = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
         _classCallCheck(this, BandwidthModule);
 
         loadingType = ~['upload', 'download'].indexOf(loadingType) ? loadingType : 'download';
 
         _get(Object.getPrototypeOf(BandwidthModule.prototype), 'constructor', this).call(this, loadingType);
+
+        _defineDecoratedPropertyDescriptor(this, '_loadingType', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_intendedEnd', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_isRestarting', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_lastLoadedValue', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_speedRecords', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_avgSpeed', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_requestID', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_progressID', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_started', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_firstProgress', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_deferredProgress', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_timingLabels', _instanceInitializers);
 
         this._extendDefaultSettings({
             data: {
@@ -215,30 +422,7 @@ var BandwidthModule = (function (_HttpModule) {
             }
         }).settings(settings);
 
-        // Define the object properties
         this._loadingType = loadingType;
-
-        this._intendedEnd = false;
-        this._isRestarting = false;
-
-        this._lastLoadedValue = null;
-        this._speedRecords = [];
-        this._avgSpeed = null;
-
-        this._requestID = 0;
-        this._progressID = 0;
-
-        this._started = false;
-        this._firstProgress = true;
-        this._deferredProgress;
-
-        // Unique labels for each request, exclusively used to make measures.
-        this._timingLabels = {
-            start: null,
-            progress: null,
-            end: null,
-            measure: null
-        };
 
         // Bind to XHR events
         this.on('xhr-upload-loadstart', function () {
@@ -264,17 +448,15 @@ var BandwidthModule = (function (_HttpModule) {
         });
     }
 
-    _inherits(BandwidthModule, _HttpModule);
+    /**
+     * Start requesting the server to make measures.
+     * @public
+     * @method BandwidthModule#start
+     * @returns {BandwidthModule}
+     */
 
-    _createClass(BandwidthModule, [{
+    _createDecoratedClass(BandwidthModule, [{
         key: 'start',
-
-        /**
-         * Start requesting the server to make measures.
-         * @public
-         * @method BandwidthModule#start
-         * @returns {BandwidthModule}
-         */
         value: function start() {
             var loadingType = this._loadingType,
                 dataSettings = this.settings().data,
@@ -314,8 +496,6 @@ var BandwidthModule = (function (_HttpModule) {
 
             return this;
         }
-    }, {
-        key: 'abort',
 
         /**
          * Abort the measures.
@@ -323,12 +503,12 @@ var BandwidthModule = (function (_HttpModule) {
          * @method BandwidthModule#abort
          * @returns {BandwidthModule}
          */
+    }, {
+        key: 'abort',
         value: function abort() {
             this._intendedEnd = true;
             return this._abort();
         }
-    }, {
-        key: '_progress',
 
         /**
          * Make bandwidth measures for the current request.
@@ -337,6 +517,8 @@ var BandwidthModule = (function (_HttpModule) {
          * @param {ProgressEvent} event The event associated with the progress event of the current request.
          * @returns {BandwidthModule}
          */
+    }, {
+        key: '_progress',
         value: function _progress(event) {
             var _this2 = this;
 
@@ -359,16 +541,16 @@ var BandwidthModule = (function (_HttpModule) {
 
             var instantSpeed;
 
-            if (!this._lastLoadedValue) {
+            if (this._lastLoadedValue === null) {
                 // We are executing the first progress event of the current request
                 instantSpeed = avgSpeed; // The instant speed of the first progress event is equal to the average one
             } else {
-                // Measure the instant speed (B/s), which defines the speed between two progress events.
-                var instantMeasure = _Timing2['default'].measure(labels.measure + '-instant-' + progressID,
-                // Set the mark of the previous progress event as the starting point
-                labels.progress + '-' + (progressID - 1), markLabel);
-                instantSpeed = (loaded - this._lastLoadedValue) / instantMeasure * 1000;
-            }
+                    // Measure the instant speed (B/s), which defines the speed between two progress events.
+                    var instantMeasure = _Timing2['default'].measure(labels.measure + '-instant-' + progressID,
+                    // Set the mark of the previous progress event as the starting point
+                    labels.progress + '-' + (progressID - 1), markLabel);
+                    instantSpeed = (loaded - this._lastLoadedValue) / instantMeasure * 1000;
+                }
 
             // Save the `loaded` property of the event for the next progress event
             this._lastLoadedValue = loaded;
@@ -384,8 +566,6 @@ var BandwidthModule = (function (_HttpModule) {
 
             return this;
         }
-    }, {
-        key: '_timeout',
 
         /**
          * Mark the current request as entirely finished (this means it ended after a time out).
@@ -393,12 +573,12 @@ var BandwidthModule = (function (_HttpModule) {
          * @method BandwidthModule#_timeout
          * @returns {BandwidthModule}
          */
+    }, {
+        key: '_timeout',
         value: function _timeout() {
             this._intendedEnd = true;
             return this;
         }
-    }, {
-        key: '_end',
 
         /**
          * End the measures.
@@ -406,6 +586,8 @@ var BandwidthModule = (function (_HttpModule) {
          * @method BandwidthModule#_end
          * @returns {BandwidthModule}
          */
+    }, {
+        key: '_end',
         value: function _end() {
             // A timeout or an abort occured, bypass the further requests and trigger the "end" event.
             if (this._intendedEnd) {
@@ -415,20 +597,20 @@ var BandwidthModule = (function (_HttpModule) {
 
             // The request ended to early, restart it with an increased data size.
             else {
-                var loadingType = this._loadingType,
-                    dataSettings = this.settings().data;
+                    var loadingType = this._loadingType,
+                        dataSettings = this.settings().data;
 
-                dataSettings.size *= dataSettings.multiplier;
+                    dataSettings.size *= dataSettings.multiplier;
 
-                this.trigger('restart', dataSettings.size);
+                    this.trigger('restart', dataSettings.size);
 
-                this._isRestarting = true;
-                this.start();
-            }
+                    this._isRestarting = true;
+                    this.start();
+                }
 
             return this;
         }
-    }]);
+    }], null, _instanceInitializers);
 
     return BandwidthModule;
 })(_HttpModule3['default']);
@@ -436,14 +618,20 @@ var BandwidthModule = (function (_HttpModule) {
 exports['default'] = BandwidthModule;
 module.exports = exports['default'];
 
-},{"../../utils/helpers":7,"../Timing":6,"./HttpModule":3}],3:[function(require,module,exports){
+/**
+ *
+ * @private
+ * @member {string} BandwidthModule#_loadingType
+ */
+
+},{"../../utils/decorators":7,"../../utils/helpers":8,"../Timing":6,"./HttpModule":3}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createDecoratedClass = (function () { function defineProperties(target, descriptors, initializers) { for (var i = 0; i < descriptors.length; i++) { var descriptor = descriptors[i]; var decorators = descriptor.decorators; var key = descriptor.key; delete descriptor.key; delete descriptor.decorators; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor || descriptor.initializer) descriptor.writable = true; if (decorators) { for (var f = 0; f < decorators.length; f++) { var decorator = decorators[f]; if (typeof decorator === 'function') { descriptor = decorator(target, key, descriptor) || descriptor; } else { throw new TypeError('The decorator for method ' + descriptor.key + ' is of the invalid type ' + typeof decorator); } } if (descriptor.initializer !== undefined) { initializers[key] = descriptor; continue; } } Object.defineProperty(target, key, descriptor); } } return function (Constructor, protoProps, staticProps, protoInitializers, staticInitializers) { if (protoProps) defineProperties(Constructor.prototype, protoProps, protoInitializers); if (staticProps) defineProperties(Constructor, staticProps, staticInitializers); return Constructor; }; })();
 
 var _get = function get(_x4, _x5, _x6) { var _again = true; _function: while (_again) { var object = _x4, property = _x5, receiver = _x6; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x4 = parent; _x5 = property; _x6 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
@@ -451,13 +639,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _defineDecoratedPropertyDescriptor(target, key, descriptors) { var _descriptor = descriptors[key]; if (!_descriptor) return; var descriptor = {}; for (var _key in _descriptor) descriptor[_key] = _descriptor[_key]; descriptor.value = descriptor.initializer.call(target); Object.defineProperty(target, key, descriptor); }
 
 var _EventDispatcher2 = require('../EventDispatcher');
 
 var _EventDispatcher3 = _interopRequireDefault(_EventDispatcher2);
 
 var _utilsHelpers = require('../../utils/helpers');
+
+var _utilsDecorators = require('../../utils/decorators');
 
 /**
  * @public
@@ -474,14 +666,120 @@ var _utilsHelpers = require('../../utils/helpers');
  */
 
 var HttpModule = (function (_EventDispatcher) {
+    var _instanceInitializers = {};
+    var _instanceInitializers = {};
+
+    _inherits(HttpModule, _EventDispatcher);
+
+    _createDecoratedClass(HttpModule, [{
+        key: '_defaultSettings',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return null;
+        },
+
+        /**
+         * The current settings.
+         * @private
+         * @member {?Object} HttpModule#_settings
+         */
+        enumerable: true
+    }, {
+        key: '_settings',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return null;
+        },
+
+        /**
+         * The module name, will be send to the server.
+         * @private
+         * @member {string} HttpModule#_moduleName
+         */
+        enumerable: true
+    }, {
+        key: '_moduleName',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return undefined;
+        },
+
+        /**
+         * The current XMLHttpRequest object.
+         * @private
+         * @member {?XMLHttpRequest} HttpModule#_xhr
+         */
+        enumerable: true
+    }, {
+        key: '_xhr',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return null;
+        },
+
+        /**
+         * An URL token to avoid any caching issues. Also allows to identify the request in the Resource Timing entries.
+         * @private
+         * @member {?string} HttpModule#_lastURLToken
+         */
+        enumerable: true
+    }, {
+        key: '_lastURLToken',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return null;
+        },
+
+        /**
+         * Defines if the module is currently running an HTTP request.
+         * @private
+         * @member {boolean} HttpModule#_requesting
+         */
+        enumerable: true
+    }, {
+        key: '_requesting',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return false;
+        },
+
+        /**
+         * Defines if the requesting status has been overridden by the `_setRequesting` method.
+         * @private
+         * @member {boolean} HttpModule#_requestingOverridden
+         */
+        enumerable: true
+    }, {
+        key: '_requestingOverridden',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return false;
+        },
+        enumerable: true
+    }], null, _instanceInitializers);
+
     function HttpModule(moduleName) {
         var _this = this;
 
-        var settings = arguments[1] === undefined ? {} : arguments[1];
+        var settings = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
         _classCallCheck(this, HttpModule);
 
         _get(Object.getPrototypeOf(HttpModule.prototype), 'constructor', this).call(this);
+
+        _defineDecoratedPropertyDescriptor(this, '_defaultSettings', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_settings', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_moduleName', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_xhr', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_lastURLToken', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_requesting', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_requestingOverridden', _instanceInitializers);
 
         this._extendDefaultSettings({
             endpoint: './network.php',
@@ -491,11 +789,6 @@ var HttpModule = (function (_EventDispatcher) {
         this.settings(settings);
 
         this._moduleName = moduleName;
-        this._xhr = null;
-        this._lastURLToken = null;
-
-        this._requestingOverridden = false;
-        this._requesting = false;
 
         // Each time a request starts or ends, set the requesting value unless it has been overridden with the
         // _setRequesting() method.
@@ -512,26 +805,24 @@ var HttpModule = (function (_EventDispatcher) {
         });
     }
 
-    _inherits(HttpModule, _EventDispatcher);
+    /**
+     * Apply a new set of custom settings.
+     * @public
+     * @method HttpModule#settings
+     * @param {HttpModule~settingsObject} settings A set of custom settings.
+     * @returns {HttpModule}
+     */
+    /**
+     * Return the current set of settings.
+     * @public
+     * @method HttpModule#settings^2
+     * @returns {HttpModule~settingsObject}
+     */
 
-    _createClass(HttpModule, [{
+    _createDecoratedClass(HttpModule, [{
         key: 'settings',
-
-        /**
-         * Apply a new set of custom settings.
-         * @public
-         * @method HttpModule#settings
-         * @param {HttpModule~settingsObject} settings A set of custom settings.
-         * @returns {HttpModule}
-         */
-        /**
-         * Return the current set of settings.
-         * @public
-         * @method HttpModule#settings^2
-         * @returns {HttpModule~settingsObject}
-         */
         value: function settings() {
-            var _settings = arguments[0] === undefined ? null : arguments[0];
+            var _settings = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 
             if ((0, _utilsHelpers.isObject)(_settings)) {
                 this._settings = (0, _utilsHelpers.assignStrict)(this._defaultSettings || {}, this._settings || {}, _settings);
@@ -540,8 +831,6 @@ var HttpModule = (function (_EventDispatcher) {
                 return this._settings || this._defaultSettings || {};
             }
         }
-    }, {
-        key: 'isRequesting',
 
         /**
          * Return if the module is currently making a request.
@@ -549,11 +838,11 @@ var HttpModule = (function (_EventDispatcher) {
          * @method HttpModule#isRequesting
          * @returns {boolean} `true` if the module is requesting, otherwise `false`.
          */
+    }, {
+        key: 'isRequesting',
         value: function isRequesting() {
             return this._requesting;
         }
-    }, {
-        key: '_extendDefaultSettings',
 
         /**
          * Extend the set of default settings.
@@ -562,12 +851,12 @@ var HttpModule = (function (_EventDispatcher) {
          * @param {Object} settings The new properties to add to the default settings.
          * @returns {HttpModule}
          */
+    }, {
+        key: '_extendDefaultSettings',
         value: function _extendDefaultSettings(settings) {
             this._defaultSettings = (0, _utilsHelpers.assign)(this._defaultSettings || {}, settings);
             return this;
         }
-    }, {
-        key: '_newRequest',
 
         /**
          * Create a new XHR request.
@@ -577,6 +866,8 @@ var HttpModule = (function (_EventDispatcher) {
          * @param {Object} queryParams The query parameters to use with the request.
          * @returns {HttpModule}
          */
+    }, {
+        key: '_newRequest',
         value: function _newRequest(httpMethod, queryParams) {
             var _this2 = this;
 
@@ -600,8 +891,6 @@ var HttpModule = (function (_EventDispatcher) {
 
             queryParams = queryParams || {};
 
-            // Generate an URL token to avoid any caching issues. This token will also allow to identify the request in the
-            // Resource Timing entries.
             var tokenSuffix = new Date().getTime();
             this._lastURLToken = 'network-' + tokenSuffix;
 
@@ -632,8 +921,8 @@ var HttpModule = (function (_EventDispatcher) {
 
             events.forEach(function (eventType) {
                 xhr.addEventListener(eventType, function () {
-                    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                        args[_key] = arguments[_key];
+                    for (var _len = arguments.length, args = Array(_len), _key2 = 0; _key2 < _len; _key2++) {
+                        args[_key2] = arguments[_key2];
                     }
 
                     // A last progress event can be triggered once a request has timed out, ignore it.
@@ -645,8 +934,8 @@ var HttpModule = (function (_EventDispatcher) {
                 // The XMLHttpRequestUpload interface supports all the above event types except the "readystatechange" one
                 if (eventType != 'readystatechange') {
                     xhr.upload.addEventListener(eventType, function () {
-                        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-                            args[_key2] = arguments[_key2];
+                        for (var _len2 = arguments.length, args = Array(_len2), _key3 = 0; _key3 < _len2; _key3++) {
+                            args[_key3] = arguments[_key3];
                         }
 
                         _this2.trigger.apply(_this2, ['xhr-upload-' + eventType, xhr].concat(args));
@@ -676,8 +965,6 @@ var HttpModule = (function (_EventDispatcher) {
 
             return this;
         }
-    }, {
-        key: '_sendRequest',
 
         /**
          * Send a newly created XHR request.
@@ -686,8 +973,10 @@ var HttpModule = (function (_EventDispatcher) {
          * @param {?*} [data=null] The data to send with the request.
          * @returns {HttpModule}
          */
+    }, {
+        key: '_sendRequest',
         value: function _sendRequest() {
-            var data = arguments[0] === undefined ? null : arguments[0];
+            var data = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 
             if (this._xhr && this._xhr.readyState == XMLHttpRequest.OPENED) {
                 this._xhr.send(data);
@@ -697,8 +986,6 @@ var HttpModule = (function (_EventDispatcher) {
 
             return this;
         }
-    }, {
-        key: '_abort',
 
         /**
          * Abort the current request.
@@ -706,6 +993,8 @@ var HttpModule = (function (_EventDispatcher) {
          * @method HttpModule#_abort
          * @returns {HttpModule}
          */
+    }, {
+        key: '_abort',
         value: function _abort() {
             if (this._xhr) {
                 this._xhr.abort();
@@ -713,8 +1002,6 @@ var HttpModule = (function (_EventDispatcher) {
 
             return this;
         }
-    }, {
-        key: '_getTimingEntry',
 
         /**
          * Get the Resource Timing entry associated to the current request.
@@ -723,6 +1010,8 @@ var HttpModule = (function (_EventDispatcher) {
          * @param {HttpModule~timingCallback} callback A callback used to send back the timing entry.
          * @returns {HttpModule}
          */
+    }, {
+        key: '_getTimingEntry',
         value: function _getTimingEntry(callback) {
             // The Resource Timing entries aren't immediately available once the 'load' event is triggered by an
             // XMLHttpRequest, we must wait for another process tick to check for a refreshed list.
@@ -745,8 +1034,6 @@ var HttpModule = (function (_EventDispatcher) {
 
             return this;
         }
-    }, {
-        key: '_setRequesting',
 
         /**
          * Override the requesting status of the module.
@@ -755,12 +1042,14 @@ var HttpModule = (function (_EventDispatcher) {
          * @param {boolean} isRequesting The requesting status.
          * @returns {HttpModule}
          */
+    }, {
+        key: '_setRequesting',
         value: function _setRequesting(isRequesting) {
             this._requestingOverridden = true;
             this._requesting = isRequesting;
             return this;
         }
-    }]);
+    }], null, _instanceInitializers);
 
     return HttpModule;
 })(_EventDispatcher3['default']);
@@ -768,14 +1057,20 @@ var HttpModule = (function (_EventDispatcher) {
 exports['default'] = HttpModule;
 module.exports = exports['default'];
 
-},{"../../utils/helpers":7,"../EventDispatcher":1}],4:[function(require,module,exports){
+/**
+ * The default settings.
+ * @private
+ * @member {?Object} HttpModule#_defaultSettings
+ */
+
+},{"../../utils/decorators":7,"../../utils/helpers":8,"../EventDispatcher":1}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createDecoratedClass = (function () { function defineProperties(target, descriptors, initializers) { for (var i = 0; i < descriptors.length; i++) { var descriptor = descriptors[i]; var decorators = descriptor.decorators; var key = descriptor.key; delete descriptor.key; delete descriptor.decorators; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor || descriptor.initializer) descriptor.writable = true; if (decorators) { for (var f = 0; f < decorators.length; f++) { var decorator = decorators[f]; if (typeof decorator === 'function') { descriptor = decorator(target, key, descriptor) || descriptor; } else { throw new TypeError('The decorator for method ' + descriptor.key + ' is of the invalid type ' + typeof decorator); } } if (descriptor.initializer !== undefined) { initializers[key] = descriptor; continue; } } Object.defineProperty(target, key, descriptor); } } return function (Constructor, protoProps, staticProps, protoInitializers, staticInitializers) { if (protoProps) defineProperties(Constructor.prototype, protoProps, protoInitializers); if (staticProps) defineProperties(Constructor, staticProps, staticInitializers); return Constructor; }; })();
 
 var _get = function get(_x5, _x6, _x7) { var _again = true; _function: while (_again) { var object = _x5, property = _x6, receiver = _x7; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x5 = parent; _x6 = property; _x7 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
@@ -783,7 +1078,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _defineDecoratedPropertyDescriptor(target, key, descriptors) { var _descriptor = descriptors[key]; if (!_descriptor) return; var descriptor = {}; for (var _key in _descriptor) descriptor[_key] = _descriptor[_key]; descriptor.value = descriptor.initializer.call(target); Object.defineProperty(target, key, descriptor); }
 
 var _HttpModule2 = require('./HttpModule');
 
@@ -794,6 +1091,8 @@ var _Timing = require('../Timing');
 var _Timing2 = _interopRequireDefault(_Timing);
 
 var _utilsHelpers = require('../../utils/helpers');
+
+var _utilsDecorators = require('../../utils/decorators');
 
 /**
  * @public
@@ -810,33 +1109,102 @@ var _utilsHelpers = require('../../utils/helpers');
  */
 
 var LatencyModule = (function (_HttpModule) {
+    var _instanceInitializers = {};
+    var _instanceInitializers = {};
+
+    _inherits(LatencyModule, _HttpModule);
+
+    _createDecoratedClass(LatencyModule, [{
+        key: '_requestsLeft',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return undefined;
+        },
+
+        /**
+         * The total number of attempts left.
+         * @private
+         * @member {number} LatencyModule#_attemptsLeft
+         */
+        enumerable: true
+    }, {
+        key: '_attemptsLeft',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return undefined;
+        },
+
+        /**
+         * The measured latencies.
+         * @private
+         * @member {number[]} LatencyModule#_latencies
+         */
+        enumerable: true
+    }, {
+        key: '_latencies',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return undefined;
+        },
+
+        /**
+         * The ID of the current request.
+         * @private
+         * @member {number} LatencyModule#_requestID
+         */
+        enumerable: true
+    }, {
+        key: '_requestID',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return 0;
+        },
+
+        /**
+         * Unique labels for each request, exclusively used to make measures.
+         * @private
+         * @member {Object} LatencyModule#_requestID
+         * @property {?string} start
+         * @property {?string} end
+         * @property {?string} measure
+         */
+        enumerable: true
+    }, {
+        key: '_timingLabels',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return {
+                start: null,
+                end: null,
+                measure: null
+            };
+        },
+        enumerable: true
+    }], null, _instanceInitializers);
+
     function LatencyModule() {
         var _this = this;
 
-        var settings = arguments[0] === undefined ? {} : arguments[0];
+        var settings = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
         _classCallCheck(this, LatencyModule);
 
         _get(Object.getPrototypeOf(LatencyModule.prototype), 'constructor', this).call(this, 'latency');
 
+        _defineDecoratedPropertyDescriptor(this, '_requestsLeft', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_attemptsLeft', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_latencies', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_requestID', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_timingLabels', _instanceInitializers);
+
         this._extendDefaultSettings({
             measures: 5,
             attempts: 3
         }).settings(settings);
-
-        // Define the object properties
-        this._requestsLeft = 0;
-        this._attemptsLeft = 0;
-
-        this._latencies = [];
-        this._requestID = 0;
-
-        // Unique labels for each request, exclusively used to make measures.
-        this._timingLabels = {
-            start: null,
-            end: null,
-            measure: null
-        };
 
         // Measure the latency with the Resource Timing API once the request is finished
         if (_Timing2['default'].supportsResourceTiming()) {
@@ -847,49 +1215,45 @@ var LatencyModule = (function (_HttpModule) {
 
         // If the browser doesn't support the Resource Timing API, we fallback on a Datetime solution.
         else {
-            // Set a mark when the request starts
-            this.on('xhr-loadstart', function () {
-                return _Timing2['default'].mark(_this._timingLabels.start);
-            });
+                // Set a mark when the request starts
+                this.on('xhr-loadstart', function () {
+                    return _Timing2['default'].mark(_this._timingLabels.start);
+                });
 
-            // Then make a measure with the previous mark
-            this.on('xhr-readystatechange', function (xhr) {
-                return _this._measure(xhr);
-            });
-        }
+                // Then make a measure with the previous mark
+                this.on('xhr-readystatechange', function (xhr) {
+                    return _this._measure(xhr);
+                });
+            }
     }
 
-    _inherits(LatencyModule, _HttpModule);
+    /**
+     * Apply a new set of custom settings.
+     * @public
+     * @method LatencyModule#settings
+     * @param {LatencyModule~settingsObject} settings A set of custom settings.
+     * @returns {LatencyModule}
+     */
+    /**
+     * Return the current set of settings.
+     * @public
+     * @method LatencyModule#settings^2
+     * @returns {LatencyModule~settingsObject}
+     */
 
-    _createClass(LatencyModule, [{
+    _createDecoratedClass(LatencyModule, [{
         key: 'settings',
-
-        /**
-         * Apply a new set of custom settings.
-         * @public
-         * @method LatencyModule#settings
-         * @param {LatencyModule~settingsObject} settings A set of custom settings.
-         * @returns {LatencyModule}
-         */
-        /**
-         * Return the current set of settings.
-         * @public
-         * @method LatencyModule#settings^2
-         * @returns {LatencyModule~settingsObject}
-         */
         value: function settings() {
-            var _settings = arguments[0] === undefined ? null : arguments[0];
+            var _settings = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 
             if ((0, _utilsHelpers.isObject)(_settings)) {
                 return _get(Object.getPrototypeOf(LatencyModule.prototype), 'settings', this).call(this, (0, _utilsHelpers.assignStrict)(_settings, {
                     delay: 0 // We dont want any timeout during a latency calculation
                 }));
             } else {
-                return (0, _utilsHelpers.except)(_get(Object.getPrototypeOf(LatencyModule.prototype), 'settings', this).call(this), ['delay']);
-            }
+                    return (0, _utilsHelpers.except)(_get(Object.getPrototypeOf(LatencyModule.prototype), 'settings', this).call(this), ['delay']);
+                }
         }
-    }, {
-        key: 'start',
 
         /**
          * Start requesting the server to make measures.
@@ -897,6 +1261,8 @@ var LatencyModule = (function (_HttpModule) {
          * @method LatencyModule#start
          * @returns {LatencyModule}
          */
+    }, {
+        key: 'start',
         value: function start() {
             // Set the number of requests required to establish the network latency. If the browser doesn't support the
             // Resource Timing API, add a request that will be ignored to avoid a longer request due to a possible
@@ -923,8 +1289,6 @@ var LatencyModule = (function (_HttpModule) {
 
             return this;
         }
-    }, {
-        key: '_nextRequest',
 
         /**
          * Initiate the next request used for latency measures.
@@ -933,10 +1297,12 @@ var LatencyModule = (function (_HttpModule) {
          * @param {boolean} [retry=false] Defines if the next request is a retry due to a failing request or not.
          * @returns {LatencyModule}
          */
+    }, {
+        key: '_nextRequest',
         value: function _nextRequest() {
             var _this2 = this;
 
-            var retry = arguments[0] === undefined ? false : arguments[0];
+            var retry = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
             var reqID = this._requestID++;
             var requestsLeft = retry ? this._requestsLeft : this._requestsLeft--;
@@ -964,8 +1330,6 @@ var LatencyModule = (function (_HttpModule) {
 
             return this;
         }
-    }, {
-        key: '_measure',
 
         /**
          * Make latency measures for the last request.
@@ -974,10 +1338,12 @@ var LatencyModule = (function (_HttpModule) {
          * @param {?XMLHttpRequest} [xhr=null] The concerned XMLHttpRequest if the browser doesn't support the Resource Timing API.
          * @returns {LatencyModule}
          */
+    }, {
+        key: '_measure',
         value: function _measure() {
             var _this3 = this;
 
-            var xhr = arguments[0] === undefined ? null : arguments[0];
+            var xhr = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 
             // With Resource Timing API
             if (!xhr) {
@@ -994,30 +1360,28 @@ var LatencyModule = (function (_HttpModule) {
             // Without Resource Timing API
             else if (this._requestsLeft < this.settings().measures) {
 
-                // Measure and save the latency if the headers have been received
-                if (xhr.readyState == XMLHttpRequest.HEADERS_RECEIVED) {
-                    var labels = this._timingLabels;
+                    // Measure and save the latency if the headers have been received
+                    if (xhr.readyState == XMLHttpRequest.HEADERS_RECEIVED) {
+                        var labels = this._timingLabels;
 
-                    _Timing2['default'].mark(labels.end);
-                    var latency = _Timing2['default'].measure(labels.measure, labels.start, labels.end);
+                        _Timing2['default'].mark(labels.end);
+                        var latency = _Timing2['default'].measure(labels.measure, labels.start, labels.end);
 
-                    if (latency) this._latencies.push(latency);
+                        if (latency) this._latencies.push(latency);
 
-                    // Abort the current request before we run a new one
-                    this._abort();
-                    this._nextRequest(!latency);
+                        // Abort the current request before we run a new one
+                        this._abort();
+                        this._nextRequest(!latency);
+                    }
                 }
-            }
 
-            // Ignore the first request when using the XHR states. See the comments in the start() method for explanations.
-            else {
-                this._nextRequest();
-            }
+                // Ignore the first request when using the XHR states. See the comments in the start() method for explanations.
+                else {
+                        this._nextRequest();
+                    }
 
             return this;
         }
-    }, {
-        key: '_end',
 
         /**
          * End the measures.
@@ -1025,6 +1389,8 @@ var LatencyModule = (function (_HttpModule) {
          * @method LatencyModule#_end
          * @returns {LatencyModule}
          */
+    }, {
+        key: '_end',
         value: function _end() {
             var latencies = this._latencies;
 
@@ -1049,7 +1415,7 @@ var LatencyModule = (function (_HttpModule) {
 
             return this;
         }
-    }]);
+    }], null, _instanceInitializers);
 
     return LatencyModule;
 })(_HttpModule3['default']);
@@ -1057,20 +1423,28 @@ var LatencyModule = (function (_HttpModule) {
 exports['default'] = LatencyModule;
 module.exports = exports['default'];
 
-},{"../../utils/helpers":7,"../Timing":6,"./HttpModule":3}],5:[function(require,module,exports){
+/**
+ * The total number of requests left.
+ * @private
+ * @member {number} LatencyModule#_requestsLeft
+ */
+
+},{"../../utils/decorators":7,"../../utils/helpers":8,"../Timing":6,"./HttpModule":3}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createDecoratedClass = (function () { function defineProperties(target, descriptors, initializers) { for (var i = 0; i < descriptors.length; i++) { var descriptor = descriptors[i]; var decorators = descriptor.decorators; var key = descriptor.key; delete descriptor.key; delete descriptor.decorators; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor || descriptor.initializer) descriptor.writable = true; if (decorators) { for (var f = 0; f < decorators.length; f++) { var decorator = decorators[f]; if (typeof decorator === 'function') { descriptor = decorator(target, key, descriptor) || descriptor; } else { throw new TypeError('The decorator for method ' + descriptor.key + ' is of the invalid type ' + typeof decorator); } } if (descriptor.initializer !== undefined) { initializers[key] = descriptor; continue; } } Object.defineProperty(target, key, descriptor); } } return function (Constructor, protoProps, staticProps, protoInitializers, staticInitializers) { if (protoProps) defineProperties(Constructor.prototype, protoProps, protoInitializers); if (staticProps) defineProperties(Constructor, staticProps, staticInitializers); return Constructor; }; })();
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _defineDecoratedPropertyDescriptor(target, key, descriptors) { var _descriptor = descriptors[key]; if (!_descriptor) return; var descriptor = {}; for (var _key in _descriptor) descriptor[_key] = _descriptor[_key]; descriptor.value = descriptor.initializer.call(target); Object.defineProperty(target, key, descriptor); }
 
 var _EventDispatcher = require('./EventDispatcher');
 
@@ -1093,6 +1467,8 @@ var _Timing = require('./Timing');
 var _Timing2 = _interopRequireDefault(_Timing);
 
 var _utilsHelpers = require('../utils/helpers');
+
+var _utilsDecorators = require('../utils/decorators');
 
 /**
  * @public
@@ -1121,14 +1497,74 @@ var _utilsHelpers = require('../utils/helpers');
  */
 
 var Network = (function () {
+    var _instanceInitializers = {};
+    var _instanceInitializers = {};
+
+    _createDecoratedClass(Network, [{
+        key: '_modules',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return {};
+        },
+
+        /**
+         * Defines if the registered modules have been initialized.
+         * @private
+         * @member {boolean} Network#_modulesInitialized
+         */
+        enumerable: true
+    }, {
+        key: '_modulesInitialized',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return false;
+        },
+
+        /**
+         * The settings defined via the constructor, they will be applied once the modules are initialized.
+         * @private
+         * @member {Network~settingsObject} Network#_pendingSettings
+         */
+        enumerable: true
+    }, {
+        key: '_pendingSettings',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return {};
+        },
+
+        /**
+         * Expose all the internal classes to the global scope. Only for testing purposes!
+         * @private
+         * @method Network._exposeInternalClasses
+         * @returns {Network}
+         */
+        enumerable: true
+    }], [{
+        key: '_exposeInternalClasses',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        value: function _exposeInternalClasses() {
+            var global = (0, _utilsHelpers.getGlobalObject)(),
+                classes = { EventDispatcher: _EventDispatcher2['default'], HttpModule: _HttpHttpModule2['default'], LatencyModule: _HttpLatencyModule2['default'], BandwidthModule: _HttpBandwidthModule2['default'], Timing: _Timing2['default'] };
+
+            Object.keys(classes).forEach(function (name) {
+                global[name] = classes[name];
+            });
+
+            return this;
+        }
+    }], _instanceInitializers);
+
     function Network() {
-        var settings = arguments[0] === undefined ? {} : arguments[0];
+        var settings = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
         _classCallCheck(this, Network);
 
-        this._modules = {};
-        this._modulesInitialized = false;
-        this._pendingSettings = {};
+        _defineDecoratedPropertyDescriptor(this, '_modules', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_modulesInitialized', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_pendingSettings', _instanceInitializers);
 
         this._registerModule('latency', function (settings) {
             return new _HttpLatencyModule2['default'](settings);
@@ -1141,26 +1577,26 @@ var Network = (function () {
         this._initModules(this.settings(settings));
     }
 
-    _createClass(Network, [{
-        key: 'settings',
+    /**
+     * Apply a new set of custom settings.
+     * @public
+     * @method Network#settings
+     * @param {Network~settingsObject} settings A set of custom settings.
+     * @returns {Network}
+     */
+    /**
+     * Return the current set of settings.
+     * @public
+     * @method Network#settings^2
+     * @returns {Network~settingsObject}
+     */
 
-        /**
-         * Apply a new set of custom settings.
-         * @public
-         * @method Network#settings
-         * @param {Network~settingsObject} settings A set of custom settings.
-         * @returns {Network}
-         */
-        /**
-         * Return the current set of settings.
-         * @public
-         * @method Network#settings^2
-         * @returns {Network~settingsObject}
-         */
+    _createDecoratedClass(Network, [{
+        key: 'settings',
         value: function settings() {
             var _this = this;
 
-            var _settings = arguments[0] === undefined ? null : arguments[0];
+            var _settings = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 
             var moduleNames = Object.keys(this._modules);
 
@@ -1189,8 +1625,8 @@ var Network = (function () {
 
                     // If the modules aren't instanciated, store the settings.
                     else {
-                        _this._pendingSettings = _settings;
-                    }
+                            _this._pendingSettings = _settings;
+                        }
 
                     return {
                         v: _this
@@ -1204,8 +1640,6 @@ var Network = (function () {
                 }, {});
             }
         }
-    }, {
-        key: 'isRequesting',
 
         /**
          * Return if a module is currently making a request.
@@ -1213,6 +1647,8 @@ var Network = (function () {
          * @method Network#isRequesting
          * @returns {boolean} `true` if a module is requesting, otherwise `false`.
          */
+    }, {
+        key: 'isRequesting',
         value: function isRequesting() {
             var requesting = false;
 
@@ -1224,8 +1660,6 @@ var Network = (function () {
 
             return requesting;
         }
-    }, {
-        key: '_registerModule',
 
         /**
          * Register a new module for the current `Network` instance.
@@ -1235,6 +1669,8 @@ var Network = (function () {
          * @param {Network~moduleCallback} moduleCallback A callback used to initialize a module with a set of settings.
          * @returns {Network}
          */
+    }, {
+        key: '_registerModule',
         value: function _registerModule(name, moduleCallback) {
             /**
              * A callback used to initialize a module with a set of settings.
@@ -1246,8 +1682,6 @@ var Network = (function () {
             this._modules[name] = moduleCallback;
             return this;
         }
-    }, {
-        key: '_initModules',
 
         /**
          * Initialize all the registered modules with the settings passed to the constructor.
@@ -1255,6 +1689,8 @@ var Network = (function () {
          * @method Network#_initModules
          * @returns {Network}
          */
+    }, {
+        key: '_initModules',
         value: function _initModules() {
             var _this2 = this;
 
@@ -1273,26 +1709,7 @@ var Network = (function () {
 
             return this;
         }
-    }], [{
-        key: '_exposeInternalClasses',
-
-        /**
-         * Expose all the internal classes to the global scope. Only for testing purposes!
-         * @private
-         * @method Network._exposeInternalClasses
-         * @returns {Network}
-         */
-        value: function _exposeInternalClasses() {
-            var global = (0, _utilsHelpers.getGlobalObject)(),
-                classes = { EventDispatcher: _EventDispatcher2['default'], HttpModule: _HttpHttpModule2['default'], LatencyModule: _HttpLatencyModule2['default'], BandwidthModule: _HttpBandwidthModule2['default'], Timing: _Timing2['default'] };
-
-            Object.keys(classes).forEach(function (name) {
-                global[name] = classes[name];
-            });
-
-            return this;
-        }
-    }]);
+    }], null, _instanceInitializers);
 
     return Network;
 })();
@@ -1300,18 +1717,28 @@ var Network = (function () {
 exports['default'] = Network;
 module.exports = exports['default'];
 
-},{"../utils/helpers":7,"./EventDispatcher":1,"./Http/BandwidthModule":2,"./Http/HttpModule":3,"./Http/LatencyModule":4,"./Timing":6}],6:[function(require,module,exports){
+/**
+ * The registered modules.
+ * @private
+ * @member {Object} Network#_modules
+ */
+
+},{"../utils/decorators":7,"../utils/helpers":8,"./EventDispatcher":1,"./Http/BandwidthModule":2,"./Http/HttpModule":3,"./Http/LatencyModule":4,"./Timing":6}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
     value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createDecoratedClass = (function () { function defineProperties(target, descriptors, initializers) { for (var i = 0; i < descriptors.length; i++) { var descriptor = descriptors[i]; var decorators = descriptor.decorators; var key = descriptor.key; delete descriptor.key; delete descriptor.decorators; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor || descriptor.initializer) descriptor.writable = true; if (decorators) { for (var f = 0; f < decorators.length; f++) { var decorator = decorators[f]; if (typeof decorator === 'function') { descriptor = decorator(target, key, descriptor) || descriptor; } else { throw new TypeError('The decorator for method ' + descriptor.key + ' is of the invalid type ' + typeof decorator); } } if (descriptor.initializer !== undefined) { initializers[key] = descriptor; continue; } } Object.defineProperty(target, key, descriptor); } } return function (Constructor, protoProps, staticProps, protoInitializers, staticInitializers) { if (protoProps) defineProperties(Constructor.prototype, protoProps, protoInitializers); if (staticProps) defineProperties(Constructor, staticProps, staticInitializers); return Constructor; }; })();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
+function _defineDecoratedPropertyDescriptor(target, key, descriptors) { var _descriptor = descriptors[key]; if (!_descriptor) return; var descriptor = {}; for (var _key in _descriptor) descriptor[_key] = _descriptor[_key]; descriptor.value = descriptor.initializer.call(target); Object.defineProperty(target, key, descriptor); }
+
 var _utilsHelpers = require('../utils/helpers');
+
+var _utilsDecorators = require('../utils/decorators');
 
 /**
  * @private
@@ -1319,50 +1746,72 @@ var _utilsHelpers = require('../utils/helpers');
  */
 
 var Timing = (function () {
+    var _instanceInitializers = {};
+    var _instanceInitializers = {};
+
+    _createDecoratedClass(Timing, [{
+        key: '_support',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return {};
+        },
+
+        /**
+         * All the marks created by the `mark` method.
+         * @private
+         * @member {Object} Timing#_marks
+         */
+        enumerable: true
+    }, {
+        key: '_marks',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return {};
+        },
+
+        /**
+         * All the measures created by the `measure` method.
+         * @private
+         * @member {Object} Timing#_measures
+         */
+        enumerable: true
+    }, {
+        key: '_measures',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return {};
+        },
+        enumerable: true
+    }], null, _instanceInitializers);
+
     function Timing() {
         _classCallCheck(this, Timing);
 
+        _defineDecoratedPropertyDescriptor(this, '_support', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_marks', _instanceInitializers);
+
+        _defineDecoratedPropertyDescriptor(this, '_measures', _instanceInitializers);
+
         var global = (0, _utilsHelpers.getGlobalObject)();
 
-        /**
-         * Defines if the current browser supports some specific Timing APIs.
-         * @private
-         * @member {Object} _support
-         * @property {boolean} performance `true` if the Performance API is available.
-         * @property {boolean} userTiming `true` if the User Timing API is available.
-         * @property {boolean} resourceTiming `true` if the Resource Timing API is available.
-         */
         this._support = {
             performance: !!global.performance,
             userTiming: global.performance && performance.mark,
-            resourceTiming: global.performance && typeof performance.getEntriesByType == 'function' && performance.timing
+            resourceTiming: global.performance && typeof performance.getEntriesByType == "function" && performance.timing
         };
-
-        /**
-         * Contains all the marks created by the `mark` method.
-         * @private
-         * @member {Object} _marks
-         */
-        this._marks = {};
-
-        /**
-         * Contains all the measures created by the `measure` method.
-         * @private
-         * @member {Object} _measures
-         */
-        this._measures = {};
     }
 
-    _createClass(Timing, [{
-        key: 'mark',
+    /**
+     * Create a new timing mark.
+     * @public
+     * @method Timing#mark
+     * @param {string} label A label associated to the mark.
+     * @returns {Timing}
+     */
 
-        /**
-         * Create a new timing mark.
-         * @public
-         * @method Timing#mark
-         * @param {string} label A label associated to the mark.
-         * @returns {Timing}
-         */
+    _createDecoratedClass(Timing, [{
+        key: 'mark',
         value: function mark(label) {
             var support = this._support,
                 marks = this._marks;
@@ -1379,8 +1828,6 @@ var Timing = (function () {
 
             return this;
         }
-    }, {
-        key: 'measure',
 
         /**
          * Measure the delay between two marks.
@@ -1391,6 +1838,8 @@ var Timing = (function () {
          * @param {string} markLabelB The label of the second mark.
          * @returns {number} The measured value.
          */
+    }, {
+        key: 'measure',
         value: function measure(measureLabel, markLabelA, markLabelB) {
             var support = this._support,
                 marks = this._marks,
@@ -1413,8 +1862,6 @@ var Timing = (function () {
 
             return measures[measureLabel];
         }
-    }, {
-        key: 'supportsResourceTiming',
 
         /**
          * Determine if the current browser supports the Resource Timing API.
@@ -1422,10 +1869,12 @@ var Timing = (function () {
          * @method Timing#supportsResourceTiming
          * @returns {boolean} `true` if the Resource Timing API is supported, otherwise `false`.
          */
+    }, {
+        key: 'supportsResourceTiming',
         value: function supportsResourceTiming() {
             return this._support.resourceTiming;
         }
-    }]);
+    }], null, _instanceInitializers);
 
     return Timing;
 })();
@@ -1433,7 +1882,45 @@ var Timing = (function () {
 exports['default'] = new Timing();
 module.exports = exports['default'];
 
-},{"../utils/helpers":7}],7:[function(require,module,exports){
+/**
+ * Defines if the current browser supports some specific Timing APIs.
+ * @private
+ * @member {Object} Timing#_support
+ * @property {boolean} performance `true` if the Performance API is available.
+ * @property {boolean} userTiming `true` if the User Timing API is available.
+ * @property {boolean} resourceTiming `true` if the Resource Timing API is available.
+ */
+
+},{"../utils/decorators":7,"../utils/helpers":8}],7:[function(require,module,exports){
+/**
+ * @callback propertyDecorator
+ * @param target
+ * @param key
+ * @param descriptor
+ */
+
+/**
+ * Set the enumerability of a property.
+ * @private
+ * @function enumerable
+ * @param {boolean} isEnumerable Whether the property should be enumerable or not.
+ * @returns {propertyDecorator}
+ */
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.enumerable = enumerable;
+
+function enumerable(isEnumerable) {
+  return function (target, key, descriptor) {
+    descriptor.enumerable = isEnumerable;
+    return descriptor;
+  };
+}
+
+},{}],8:[function(require,module,exports){
 (function (global){
 /**
  * Return the global object.
@@ -1508,7 +1995,7 @@ function copy(value) {
  * @returns {Object} The destination object once the properties are copied.
  */
 function _assign(strict) {
-    var target = arguments[1] === undefined ? {} : arguments[1];
+    var target = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     target = copy(target);
 
@@ -1538,7 +2025,7 @@ function _assign(strict) {
  */
 
 function assign() {
-    var target = arguments[0] === undefined ? {} : arguments[0];
+    var target = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     for (var _len2 = arguments.length, sources = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
         sources[_key2 - 1] = arguments[_key2];
@@ -1557,7 +2044,7 @@ function assign() {
  */
 
 function assignStrict() {
-    var target = arguments[0] === undefined ? {} : arguments[0];
+    var target = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     for (var _len3 = arguments.length, sources = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
         sources[_key3 - 1] = arguments[_key3];
@@ -1594,27 +2081,27 @@ function except(obj, properties) {
  */
 
 function defer() {
-    var func = arguments[0] === undefined ? function () {} : arguments[0];
+    var func = arguments.length <= 0 || arguments[0] === undefined ? function () {} : arguments[0];
 
     /**
      * @private
      * @class Defer
      */
     return new ((function () {
-        var _class = function _class() {
+        function _class() {
             _classCallCheck(this, _class);
 
             this.func = func;
-        };
+        }
+
+        /**
+         * Execute the deferred function.
+         * @public
+         * @method Defer#run
+         */
 
         _createClass(_class, [{
             key: 'run',
-
-            /**
-             * Execute the deferred function.
-             * @public
-             * @method Defer#run
-             */
             value: function run() {
                 if (this.func) this.func();
                 delete this.func;
