@@ -597,12 +597,11 @@ var BandwidthModule = (function (_HttpModule) {
 
             // The request ended to early, restart it with an increased data size.
             else {
-                    var loadingType = this._loadingType,
-                        dataSettings = this.settings().data;
+                    var dataSettings = this.settings().data,
+                        size = dataSettings.size * dataSettings.multiplier;
 
-                    dataSettings.size *= dataSettings.multiplier;
-
-                    this.trigger('restart', dataSettings.size);
+                    this.settings({ data: { size: size } });
+                    this.trigger('restart', size);
 
                     this._isRestarting = true;
                     this.start();
