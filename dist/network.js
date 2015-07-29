@@ -828,7 +828,7 @@ var HttpModule = (function (_EventDispatcher) {
                 this._settings = (0, _utilsHelpers.assignStrict)(this._defaultSettings || {}, this._settings || {}, _settings);
                 return this;
             } else {
-                return this._settings || this._defaultSettings || {};
+                return (0, _utilsHelpers.copy)(this._settings || this._defaultSettings || {});
             }
         }
 
@@ -947,10 +947,12 @@ var HttpModule = (function (_EventDispatcher) {
             // measures.
             // See: https://github.com/nesk/network.js/issues/26
             var startTimeout = function startTimeout(xhr) {
-                _this2.trigger('xhr-timeout');
-                _this2.trigger('xhr-upload-timeout');
                 setTimeout(function () {
-                    return xhr.abort();
+                    if (xhr.readyState != XMLHttpRequest.UNSENT && xhr.readyState != XMLHttpRequest.DONE) {
+                        _this2.trigger('xhr-timeout');
+                        _this2.trigger('xhr-upload-timeout');
+                        xhr.abort();
+                    }
                 }, settings.delay);
             };
 
