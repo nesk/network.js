@@ -159,6 +159,17 @@ net.latency.settings({
 console.log(net.latency.settings());
 ```
 
+### Server configuration
+
+If you use Apache with its default configuration, everything should work.
+
+If you get any errors, check your server configuration, you must:
+
+* Disable persistent HTTP connections and add a `Connection: close` header to responses.
+* Disable any form of cache with `Cache-Control: no-cache, no-store, no-transform` and `Pragma: no-cache`.
+* Disable GZIP compression.
+* Disable the body size limit.
+
 ## Compatibility
 
 Network.js is based on two browser features: [Resource Timing](http://caniuse.com/#feat=resource-timing) and [XMLHttpRequest (v2)](http://caniuse.com/#feat=xhr2). While the first one [can be polyfilled](client/timing.js), the second one is a requirement.
