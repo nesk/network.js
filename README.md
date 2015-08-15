@@ -166,7 +166,7 @@ Network.js is based on two browser features: [Resource Timing](http://caniuse.co
 Thus, Network.js should be compatible with:
 
 | Browser              | Partial support (polyfill) | Native support |
-| -------------------- | :-------------------:      | :------------: |
+| -------------------- | :------------------------: | :------------: |
 | IE 10+               |                            | ✔              |
 | Firefox 35+          |                            | ✔              |
 | [Chrome 29+][1]      |                            | ✔              |
@@ -179,11 +179,18 @@ Thus, Network.js should be compatible with:
 | Opera 12.1+          | ✔                          |                |
 | Android Browser 3+   | ✔                          |                |
 
-Latency measures can be __very far__ from reality if the browser doesn't have native support and uses the provided polyfill.
+Latency measures can be __very far__ from reality if the browser doesn't support Resource Timing and uses the provided polyfill. You can determine if the browser uses the latter:
+
+```js
+if (Network.supportsResourceTiming) {
+    // Resource Timing is available.
+} else {
+    // The polyfill will be used, expect some weird latency measures.
+}
+```
 
 ## Caveats
 
-* Latency measures never return any results with Firefox.
 * Chrome cannot upload a __~128 MB__ file, which will mainly affect fiber users.
 * Currently, the client and the server must be on the same domain or measures can't be done due to the [same-origin policy](http://en.wikipedia.org/wiki/Same-origin_policy).
 
