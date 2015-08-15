@@ -192,7 +192,6 @@ if (Network.supportsResourceTiming) {
 ## Caveats
 
 * Chrome cannot upload a __~128 MB__ file, which will mainly affect fiber users.
-* Currently, the client and the server must be on the same domain or measures can't be done due to the [same-origin policy](http://en.wikipedia.org/wiki/Same-origin_policy).
 
 ## Compilation
 
