@@ -67,7 +67,7 @@ var EventDispatcher = (function () {
          * @public
          * @method EventDispatcher#off
          * @param {string|string[]} events One or multiple event names.
-         * @param {EventDispatcher~eventHandler} callback An event handler.
+         * @param {EventDispatcher~eventHandler} [callback=null] An event handler.
          * @returns {EventDispatcher}
          */
     }, {
@@ -1116,6 +1116,19 @@ var LatencyModule = (function (_HttpModule) {
     _inherits(LatencyModule, _HttpModule);
 
     _createDecoratedClass(LatencyModule, [{
+        key: '_supportsResourceTiming',
+        decorators: [(0, _utilsDecorators.enumerable)(false)],
+        initializer: function initializer() {
+            return undefined;
+        },
+
+        /**
+         * The total number of requests left.
+         * @private
+         * @member {number} LatencyModule#_requestsLeft
+         */
+        enumerable: true
+    }, {
         key: '_requestsLeft',
         decorators: [(0, _utilsDecorators.enumerable)(false)],
         initializer: function initializer() {
@@ -1184,13 +1197,13 @@ var LatencyModule = (function (_HttpModule) {
     }], null, _instanceInitializers);
 
     function LatencyModule() {
-        var _this = this;
-
         var settings = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
         _classCallCheck(this, LatencyModule);
 
         _get(Object.getPrototypeOf(LatencyModule.prototype), 'constructor', this).call(this, 'latency');
+
+        _defineDecoratedPropertyDescriptor(this, '_supportsResourceTiming', _instanceInitializers);
 
         _defineDecoratedPropertyDescriptor(this, '_requestsLeft', _instanceInitializers);
 
@@ -1207,25 +1220,7 @@ var LatencyModule = (function (_HttpModule) {
             attempts: 3
         }).settings(settings);
 
-        // Measure the latency with the Resource Timing API once the request is finished
-        if (_Timing2['default'].supportsResourceTiming()) {
-            this.on('xhr-load', function () {
-                return _this._measure();
-            });
-        }
-
-        // If the browser doesn't support the Resource Timing API, we fallback on a Datetime solution.
-        else {
-                // Set a mark when the request starts
-                this.on('xhr-loadstart', function () {
-                    return _Timing2['default'].mark(_this._timingLabels.start);
-                });
-
-                // Then make a measure with the previous mark
-                this.on('xhr-readystatechange', function (xhr) {
-                    return _this._measure(xhr);
-                });
-            }
+        this._defineResourceTimingSupport();
     }
 
     /**
@@ -1265,19 +1260,17 @@ var LatencyModule = (function (_HttpModule) {
     }, {
         key: 'start',
         value: function start() {
-            // Set the number of requests required to establish the network latency. If the browser doesn't support the
-            // Resource Timing API, add a request that will be ignored to avoid a longer request due to a possible
-            // DNS/whatever fetch.
-
             var _settings2 = this.settings();
 
+            // Set the number of requests required to establish the network latency.
             var measures = _settings2.measures;
             var attempts = _settings2.attempts;
-
             this._requestsLeft = measures;
             this._attemptsLeft = attempts * measures;
 
-            if (!_Timing2['default'].supportsResourceTiming()) {
+            // If the browser doesn't support the Resource Timing API, add a request that will be ignored to avoid a longer
+            // request due to a possible DNS/whatever fetch.
+            if (!this._supportsResourceTiming) {
                 this._requestsLeft++;
                 this._attemptsLeft++;
             }
@@ -1289,6 +1282,45 @@ var LatencyModule = (function (_HttpModule) {
             this._nextRequest();
 
             return this;
+        }
+
+        /**
+         * Define if the module should support the Resource Timing API.
+         * @private
+         * @method LatencyModule#_defineResourceTimingSupport
+         * @param {boolean} supportsResourceTiming If `undefined`, the support will be determined by feature detection.
+         * @returns {LatencyModule}
+         */
+    }, {
+        key: '_defineResourceTimingSupport',
+        value: function _defineResourceTimingSupport(supportsResourceTiming) {
+            var _this = this;
+
+            if (typeof supportsResourceTiming !== 'boolean') supportsResourceTiming = _Timing2['default'].supportsResourceTiming;
+            this._supportsResourceTiming = supportsResourceTiming;
+
+            // Unregisters all the previously registered events, since this method can be called multiple times.
+            this.off(['xhr-load', 'xhr-loadstart', 'xhr-readystatechange']);
+
+            // Measure the latency with the Resource Timing API once the request is finished
+            if (supportsResourceTiming) {
+                this.on('xhr-load', function () {
+                    return _this._measure();
+                });
+            }
+
+            // If the browser doesn't support the Resource Timing API, we fallback on a Datetime solution.
+            else {
+                    // Set a mark when the request starts
+                    this.on('xhr-loadstart', function () {
+                        return _Timing2['default'].mark(_this._timingLabels.start);
+                    });
+
+                    // Then make a measure with the previous mark
+                    this.on('xhr-readystatechange', function (xhr) {
+                        return _this._measure(xhr);
+                    });
+                }
         }
 
         /**
@@ -1401,6 +1433,13 @@ var LatencyModule = (function (_HttpModule) {
             }, 0) / (latencies.length || 1);
             avgLatency = avgLatency || null;
 
+            // If there is no measures, restart with the polyfill.
+            if (!latencies.length) {
+                this._defineResourceTimingSupport(false);
+                this.start();
+                return this;
+            }
+
             // If there is not enough measures, display a warning.
             if (latencies.length < this.settings().measures) {
                 var _settings3 = this.settings();
@@ -1408,7 +1447,7 @@ var LatencyModule = (function (_HttpModule) {
                 var measures = _settings3.measures;
                 var attempts = _settings3.attempts;
 
-                console.warn(['An insufficient number of measures have been processed, this could be due to your web server using', 'persistant connections or to your client settings (measures: ' + measures + ', attempts: ' + attempts + ')'].join(' '));
+                console.warn('\n                An insufficient number of measures have been processed, this could be due to your web server using\n                persistant connections or to your client settings (measures: ' + measures + ', attempts: ' + attempts + ').\n            ');
             }
 
             // Trigger the "end" event with the average latency and the latency list as parameters
@@ -1425,7 +1464,7 @@ exports['default'] = LatencyModule;
 module.exports = exports['default'];
 
 /**
- * The total number of requests left.
+ * Defines if the module supports the Resource Timing API.
  * @private
  * @member {number} LatencyModule#_requestsLeft
  */
@@ -1554,6 +1593,24 @@ var Network = (function () {
 
             return this;
         }
+    }, {
+        key: 'supportsResourceTiming',
+
+        /**
+         * Defines if the current browser supports the Resource Timing API.
+         * @public
+         * @readonly
+         * @member {boolean} Network#supportsResourceTiming
+         */
+        get: function get() {
+            return _Timing2['default'].supportsResourceTiming;
+        }
+
+        /**
+         * The registered modules.
+         * @private
+         * @member {Object} Network#_modules
+         */
     }], _instanceInitializers);
 
     function Network() {
@@ -1718,12 +1775,6 @@ var Network = (function () {
 exports['default'] = Network;
 module.exports = exports['default'];
 
-/**
- * The registered modules.
- * @private
- * @member {Object} Network#_modules
- */
-
 },{"../utils/decorators":7,"../utils/helpers":8,"./EventDispatcher":1,"./Http/BandwidthModule":2,"./Http/HttpModule":3,"./Http/LatencyModule":4,"./Timing":6}],6:[function(require,module,exports){
 'use strict';
 
@@ -1751,6 +1802,27 @@ var Timing = (function () {
     var _instanceInitializers = {};
 
     _createDecoratedClass(Timing, [{
+        key: 'supportsResourceTiming',
+
+        /**
+         * Defines if the current browser supports the Resource Timing API.
+         * @public
+         * @readonly
+         * @member {boolean} Timing#supportsResourceTiming
+         */
+        get: function get() {
+            return Boolean(this._support.resourceTiming);
+        }
+
+        /**
+         * Defines if the current browser supports some specific Timing APIs.
+         * @private
+         * @member {Object} Timing#_support
+         * @property {boolean} performance `true` if the Performance API is available.
+         * @property {boolean} userTiming `true` if the User Timing API is available.
+         * @property {boolean} resourceTiming `true` if the Resource Timing API is available.
+         */
+    }, {
         key: '_support',
         decorators: [(0, _utilsDecorators.enumerable)(false)],
         initializer: function initializer() {
@@ -1863,18 +1935,6 @@ var Timing = (function () {
 
             return measures[measureLabel];
         }
-
-        /**
-         * Determine if the current browser supports the Resource Timing API.
-         * @public
-         * @method Timing#supportsResourceTiming
-         * @returns {boolean} `true` if the Resource Timing API is supported, otherwise `false`.
-         */
-    }, {
-        key: 'supportsResourceTiming',
-        value: function supportsResourceTiming() {
-            return this._support.resourceTiming;
-        }
     }], null, _instanceInitializers);
 
     return Timing;
@@ -1882,15 +1942,6 @@ var Timing = (function () {
 
 exports['default'] = new Timing();
 module.exports = exports['default'];
-
-/**
- * Defines if the current browser supports some specific Timing APIs.
- * @private
- * @member {Object} Timing#_support
- * @property {boolean} performance `true` if the Performance API is available.
- * @property {boolean} userTiming `true` if the User Timing API is available.
- * @property {boolean} resourceTiming `true` if the Resource Timing API is available.
- */
 
 },{"../utils/decorators":7,"../utils/helpers":8}],7:[function(require,module,exports){
 /**
