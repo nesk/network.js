@@ -4,7 +4,7 @@ A __JavaScript__ library, entirely written in ES6, to measure various aspects of
 
 ## Installation
 
-User Bower or [download a ZIP file](https://github.com/nesk/network.js/archive/master.zip):
+Use Bower or download an archive [from the releases page](https://github.com/nesk/network.js/releases):
 
 ```shell
 bower install network-js
@@ -14,14 +14,20 @@ bower install network-js
 <script src="bower_components/network-js/dist/network.min.js"></script>
 ```
 
+Next, add the [server.php](server/server.php) on your web server.
+
 ## How to use
 
 ```js
-// Create a new Network instance by providing an optional object.
 var settings = {
-    // The settings list is available below.
+
+    endpoint: 'path/to/the/server.php', // Where is located the PHP file.
+
+    // The complete settings list is available below.
+
 };
 
+// Create a new Network instance by providing an optional object.
 var net = new Network(settings);
 
 // Listen for the "end" event which provides the calculated latencies.
