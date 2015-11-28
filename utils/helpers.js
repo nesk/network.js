@@ -1,3 +1,5 @@
+import isPlainObject from 'lodash.isplainobject';
+
 /**
  * Return the global object.
  * @private
@@ -20,17 +22,6 @@ export function getGlobalObject() {
 }
 
 /**
- * Determine if the provided value is an object.
- * @private
- * @function isObject
- * @param {*} obj The value to check.
- * @returns {boolean} `true` if the value is an object, otherwise `false`.
- */
-export function isObject(obj) {
-    return obj != undefined && obj != null && typeof obj.valueOf() == 'object';
-}
-
-/**
  * Make a deep copy of any value.
  * @private
  * @function copy
@@ -42,7 +33,7 @@ export function copy(value) {
 }
 
 /**
- * Deeply copy the properties in the source objects over to the destination object.
+ * Deeply copy the properties in the source objects to the destination object.
  * @private
  * @function _assign
  * @param {boolean} strict Given `true`, new properties will not be copied.
@@ -57,7 +48,7 @@ function _assign(strict, target = {}, ...sources) {
         Object.keys(source).forEach(key => {
             if (!strict || target.hasOwnProperty(key)) {
                 let value = source[key];
-                target[key] = isObject(value) ? _assign(strict, target[key], value) : value;
+                target[key] = isPlainObject(value) ? _assign(strict, target[key], value) : value;
             }
         })
     });
@@ -66,7 +57,7 @@ function _assign(strict, target = {}, ...sources) {
 }
 
 /**
- * Deeply copy all the properties in the source objects over to the destination object.
+ * Deeply copy all the properties in the source objects to the destination object.
  * @private
  * @function assign
  * @param {Object} [target={}] The destination object.
@@ -78,7 +69,7 @@ export function assign(target = {}, ...sources) {
 }
 
 /**
- * Deeply copy the properties (but no new ones) in the source objects over to the destination object.
+ * Deeply copy the properties (but no new ones) in the source objects to the destination object.
  * @private
  * @function assignStrict
  * @param {Object} [target={}] The destination object.
