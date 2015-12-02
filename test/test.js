@@ -104,6 +104,17 @@ describe("Network instances", function() {
         });
     });
 
+    it("should process dynamic settings", function() {
+        var finalEndpoint = 'http://example.org'
+            speed = new Network({
+                endpoint: finalEndpoint,
+            });
+
+        ['latency', 'upload', 'download'].forEach(function(moduleName) {
+            expect(speed.settings()[moduleName].endpoint).to.be.equal(finalEndpoint);
+        });
+    });
+
 });
 
 describe("latency module", commonModulesIt('latency'));
