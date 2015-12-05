@@ -46,10 +46,9 @@ describe("Network instances", function() {
             endpoint: '/all/',
             delay: 7000,
             measures: 10,
-            unknown_property: true,
 
             data: {
-                multiplier: 1.5
+                multiplier: 1.5,
             },
 
             latency: {
@@ -58,44 +57,50 @@ describe("Network instances", function() {
 
             upload: {
                 endpoint: '/upload/',
-                delay: 10000
+                delay: 10000,
             },
 
             download: {
                 endpoint: '/download/',
 
                 data: {
-                    multiplier: 1.8
-                }
-            }
+                    multiplier: 1.8,
+                },
+            },
         });
 
         expect(speed.settings()).to.deep.equal({
             latency: {
                 endpoint: '/latency/',
                 measures: 10,
-                attempts: 3
+                attempts: 3,
+
+                data: {
+                    multiplier: 1.5,
+                },
             },
 
             upload: {
                 endpoint: '/upload/',
                 delay: 10000,
+                measures: 10,
 
                 data: {
                     size: 2 * 1024 * 1024,
-                    multiplier: 1.5
-                }
+                    multiplier: 1.5,
+                },
             },
 
             download: {
                 endpoint: '/download/',
                 delay: 7000,
+                measures: 10,
 
                 data: {
                     size: 10 * 1024 * 1024,
-                    multiplier: 1.8
-                }
-            }
+                    multiplier: 1.8,
+                },
+            },
         });
     });
 

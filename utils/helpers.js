@@ -33,54 +33,6 @@ export function copy(value) {
 }
 
 /**
- * Deeply copy the properties in the source objects to the destination object.
- * @private
- * @function _assign
- * @param {boolean} strict Given `true`, new properties will not be copied.
- * @param {Object} [target={}] The destination object.
- * @param {...Object} sources The source objects.
- * @returns {Object} The destination object once the properties are copied.
- */
-function _assign(strict, target = {}, ...sources) {
-    target = copy(target);
-
-    sources.forEach(source => {
-        Object.keys(source).forEach(key => {
-            if (!strict || target.hasOwnProperty(key)) {
-                let value = source[key];
-                target[key] = isPlainObject(value) ? _assign(strict, target[key], value) : value;
-            }
-        })
-    });
-
-    return target;
-}
-
-/**
- * Deeply copy all the properties in the source objects to the destination object.
- * @private
- * @function assign
- * @param {Object} [target={}] The destination object.
- * @param {...Object} sources The source objects.
- * @returns {Object} The destination object once the properties are copied.
- */
-export function assign(target = {}, ...sources) {
-    return _assign(false, target, ...sources);
-}
-
-/**
- * Deeply copy the properties (but no new ones) in the source objects to the destination object.
- * @private
- * @function assignStrict
- * @param {Object} [target={}] The destination object.
- * @param {...Object} sources The source objects.
- * @returns {Object} The destination object once the properties are copied.
- */
-export function assignStrict(target = {}, ...sources) {
-    return _assign(true, target, ...sources);
-}
-
-/**
  * Get a copy of an object without some of its properties.
  * @private
  * @function except
@@ -89,10 +41,8 @@ export function assignStrict(target = {}, ...sources) {
  * @returns {Object} The copied object without the specified properties.
  */
 export function except(obj, properties) {
-    let objCopy = copy(obj);
-
+    const objCopy = Object.assign({}, obj);
     properties.forEach(index => delete objCopy[index]);
-
     return objCopy;
 }
 
@@ -109,8 +59,7 @@ export function defer(func = () => {}) {
      * @class Defer
      */
     return new class {
-        constructor()
-        {
+        constructor() {
             this.func = func;
         }
 
@@ -119,8 +68,7 @@ export function defer(func = () => {}) {
          * @public
          * @method Defer#run
          */
-        run()
-        {
+        run() {
             if (this.func) this.func();
             delete this.func;
         }
