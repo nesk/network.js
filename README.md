@@ -2,6 +2,12 @@
 
 A __JavaScript__ library, entirely written in ES6, to measure various aspects of a connection. It can accurately estimate a bandwidth/latency between a client (using a web browser) and a server (running a specific script).
 
+## **THE PROJECT IS ON HOLD**
+
+I'm not working on Network.js anymore because I don't have time for it. It will stay on hold until I found some time to work on it or until someone wants to become the new maintainer of this project.
+
+Contact me on my e-mail address (see my Github profile) if you want to become the new maintainer of Network.js.
+
 ## Installation
 
 Use Bower or download an archive [from the releases page](https://github.com/nesk/network.js/releases):
